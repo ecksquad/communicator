@@ -29,10 +29,17 @@
   main{flex:1;overflow-y:auto;padding:0 18px 28px}
   .view{max-width:1060px;margin:0 auto}
 
-  .flag-row{display:flex;gap:10px;justify-content:center;margin-bottom:6px}
-  .flag-btn{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;
-    padding:9px 18px;font-size:15px;font-weight:700;cursor:pointer}
-  .flag-btn.active{border-color:var(--accent);color:var(--ink);background:rgba(55,182,224,.12)}
+  .lang-cards{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+  .lang-card{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:14px 16px 12px;
+    text-align:center;min-width:148px;box-shadow:var(--shadow);transition:border-color .25s ease}
+  .lang-card.active{border-color:var(--accent)}
+  .flag{width:76px;height:50px;border-radius:8px;display:block;margin:0 auto 8px;
+    box-shadow:0 2px 8px rgba(0,0,0,.45)}
+  .lang-name{font-size:15px;font-weight:750;margin-bottom:9px}
+  .gender-pair{display:flex;gap:6px;justify-content:center}
+  .g-btn{border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:999px;
+    padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer}
+  .g-btn.active{background:var(--accent);border-color:var(--accent);color:#02202b}
 
   /* ---- main view ---- */
   #spoken{min-height:110px;display:flex;align-items:center;justify-content:center;text-align:center;
@@ -148,11 +155,44 @@
 <main>
   <!-- ================= MAIN VIEW ================= -->
   <div class="view" id="mainView">
-    <div class="flag-row">
-      <button class="flag-btn" data-lang="en" data-gender="male">🇬🇧 Male</button>
-      <button class="flag-btn" data-lang="en" data-gender="female">🇬🇧 Female</button>
-      <button class="flag-btn" data-lang="sv" data-gender="male">🇸🇪 Man</button>
-      <button class="flag-btn" data-lang="sv" data-gender="female">🇸🇪 Kvinna</button>
+    <div class="lang-cards">
+      <div class="lang-card" data-card="en">
+        <svg class="flag" viewBox="0 0 60 40" aria-label="English">
+          <rect width="60" height="40" fill="#012169"/>
+          <path d="M0,0 L60,40 M60,0 L0,40" stroke="#ffffff" stroke-width="8"/>
+          <path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="4"/>
+          <path d="M30,0 V40 M0,20 H60" stroke="#ffffff" stroke-width="14"/>
+          <path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="8"/>
+        </svg>
+        <div class="lang-name">English</div>
+        <div class="gender-pair">
+          <button class="g-btn" data-lang="en" data-gender="male">Male</button>
+          <button class="g-btn" data-lang="en" data-gender="female">Female</button>
+        </div>
+      </div>
+      <div class="lang-card" data-card="sv">
+        <svg class="flag" viewBox="0 0 60 40" aria-label="Svenska">
+          <rect width="60" height="40" fill="#006AA7"/>
+          <rect x="18" width="8" height="40" fill="#FECC02"/>
+          <rect y="16" width="60" height="8" fill="#FECC02"/>
+        </svg>
+        <div class="lang-name">Svenska</div>
+        <div class="gender-pair">
+          <button class="g-btn" data-lang="sv" data-gender="male">Man</button>
+          <button class="g-btn" data-lang="sv" data-gender="female">Kvinna</button>
+        </div>
+      </div>
+      <div class="lang-card" data-card="uk">
+        <svg class="flag" viewBox="0 0 60 40" aria-label="Українська">
+          <rect width="60" height="20" fill="#0057B7"/>
+          <rect y="20" width="60" height="20" fill="#FFD700"/>
+        </svg>
+        <div class="lang-name">Українська</div>
+        <div class="gender-pair">
+          <button class="g-btn" data-lang="uk" data-gender="male">Чоловічий</button>
+          <button class="g-btn" data-lang="uk" data-gender="female">Жіночий</button>
+        </div>
+      </div>
     </div>
     <div id="loading">Starting the camera and loading recognition …<br>
       <span style="font-size:13px">(the first time takes a while — the models are downloading)</span></div>
@@ -415,6 +455,67 @@ sv: {
     ILoveYou:{ name:"Jag älskar dig-tecknet", def:"Du är bäst",
       how:"Sträck ut tumme, pekfinger och lillfinger samtidigt (🤟-tecknet), lång- och ringfinger stängda. Håll stilla." }
   }
+},
+uk: {
+  sub:"РУХИ → ГОЛОС", ttsLang:"uk-UA",
+  loading:"Запускаю камеру та розпізнавання …<br><span style='font-size:13px'>(першого разу це триває довше — завантажуються моделі)</span>",
+  loadFail:pre=>"Не вдалося запустити: "+pre+"<br><span style='font-size:13px'>Перевірте, що сторінці дозволено використовувати камеру (замочок в адресному рядку).</span>",
+  waiting:"Чекаю на рух …", seeing:"Я тебе бачу ✓", looking:"Шукаю обличчя …",
+  pause:"Призупинити", resume:"Продовжити",
+  secGestures:"Рухи та фрази", secVoice:"Голос", secSens:"Чутливість", secBackup:"Резервна копія",
+  voiceLbl:"Голос", voiceDesc:"Голос для фраз без власного запису",
+  rateLbl:"Швидкість",
+  genderLbl:"Тип голосу", gAuto:"Найкращий доступний", gFemale:"Жіночий", gMale:"Чоловічий",
+  holdLbl:"Час утримання", holdDesc:"Як довго тримати рух, щоб він зарахувався",
+  yawLbl:"Поворот голови", yawDesc:"Наскільки треба повернути голову вбік",
+  pitchLbl:"Нахил голови", pitchDesc:"Наскільки треба нахилити голову вгору чи вниз",
+  blinkLbl:"Тривалість кліпання", blinkDesc:"Скільки триває навмисне кліпання (природне ~0,2 с)",
+  coolLbl:"Пауза", coolDesc:"Пауза після фрази, перш ніж спрацює наступна",
+  swapLbl:"Поміняти право/ліво", swapDesc:"Якщо так/ні віддзеркалені — увімкніть це",
+  exportLbl:"Експорт налаштувань", exportDesc:"Зберігає фрази та чутливість у файл (без аудіозаписів)",
+  exportBtn:"Експорт", importLbl:"Імпорт налаштувань", importBtn:"Імпорт",
+  footNote:"Розпізнавання відбувається локально у браузері — зображення з камери не залишає пристрій. " +
+    "«Власний голос»: натисніть 🎤 біля фрази та запишіть її (будь-яким голосом, наприклад голосом рідної людини). " +
+    "Запис відтворюється замість комп'ютерного голосу. Записи зберігаються локально на цьому пристрої.",
+  phrasePh:"Введіть фразу, яку треба сказати",
+  recSaved:"Запис збережено — тепер він звучить замість комп'ютерного голосу",
+  recStart:"Йде запис … натисніть 🎤 ще раз, щоб зупинити", recFail:"Не вдалося увімкнути мікрофон",
+  recExists:"Є власний запис — <b>він звучить замість комп'ютерного голосу</b>", recGone:"Запис видалено",
+  cfgImported:"Налаштування імпортовано", cfgBad:"Не вдалося прочитати файл",
+  voiceWarn:"⚠ На цьому пристрої немає українського голосу. Фрази можуть звучати неправильно. Встановіть українську в налаштуваннях синтезу мовлення системи (Windows: Параметри → Час і мова → Мовлення; Android/iPhone: налаштування синтезу мовлення).",
+  helpTitle:"Як це робити", helpClose:"Закрити",
+  helpSub:"Тримайте кожен рух нерухомо, доки фраза не пролунає — маленька зелена смужка під карткою показує, що рух зараховується. Після кожної фрази застосунок відпочиває кілька секунд.",
+  tips:"<b>Поради для найкращого розпізнавання</b><br>• Сидіть обличчям у центрі кадру, приблизно на відстані витягнутої руки від камери.<br>• Гарне світло спереду — уникайте вікон чи ламп позаду.<br>• Показуйте одну руку за раз, на рівні грудей або обличчя, долонею до камери.<br>• Якщо так/ні віддзеркалені: увімкніть «Поміняти право/ліво» в налаштуваннях.<br>• Занадто чутливо або повільно? Налаштуйте час утримання та чутливість.",
+  g:{
+    headRight:{ name:"Голова праворуч", def:"Так",
+      how:"Чітко поверніть голову праворуч, ніби озираєтесь через плече. Тримайте, доки фраза не пролунає (близько секунди), потім поверніться до центру." },
+    headLeft:{ name:"Голова ліворуч", def:"Ні",
+      how:"Чітко поверніть голову ліворуч, ніби озираєтесь через плече. Тримайте, доки фраза не пролунає, потім поверніться до центру." },
+    headUp:{ name:"Голова вгору", def:"Привіт",
+      how:"Відхиліть голову назад, ніби дивитесь у стелю. Тримайте, доки фраза не пролунає, потім поверніться до центру." },
+    headDown:{ name:"Голова вниз", def:"До побачення",
+      how:"Опустіть підборіддя до грудей, ніби дивитесь на коліна. Тримайте, доки фраза не пролунає, потім підніміть голову." },
+    longBlink:{ name:"Довге кліпання", def:"Я тебе люблю",
+      how:"Заплющте обидва ока і тримайте їх заплющеними близько секунди. Звичайне швидке кліпання ніколи не рахується — спрацьовує саме довге заплющення." },
+    browRaise:{ name:"Підняті брови", def:"Подивись сюди",
+      how:"Добре підніміть брови, як здивоване обличчя, і тримайте, доки фраза не пролунає." },
+    mouthOpen:{ name:"Відкритий рот", def:"Дякую",
+      how:"Широко відкрийте рота, як для великого укусу, і тримайте відкритим, доки фраза не пролунає." },
+    Pointing_Up:{ name:"Один палець", def:"Я хочу їсти",
+      how:"Тримайте ОДИН вказівний палець вгору до камери, інші пальці стиснуті. Тримайте руку нерухомо, доки фраза не пролунає." },
+    Victory:{ name:"Два пальці", def:"Я хочу пити",
+      how:"Знак «пис»: вказівний і середній пальці розведені у V, інші стиснуті. Тримайте нерухомо." },
+    Open_Palm:{ name:"Уся долоня", def:"Допоможіть",
+      how:"Покажіть відкриту долоню до камери, усі п'ять пальців розведені, як знак «стоп». Тримайте нерухомо." },
+    Closed_Fist:{ name:"Кулак", def:"Мені боляче",
+      how:"Стисніть руку в кулак і тримайте до камери нерухомо." },
+    Thumb_Up:{ name:"Великий палець вгору", def:"Мені добре",
+      how:"Великий палець вгору, інші стиснуті. Тримайте нерухомо." },
+    Thumb_Down:{ name:"Великий палець вниз", def:"Мені погано",
+      how:"Великий палець вниз, інші стиснуті. Тримайте нерухомо." },
+    ILoveYou:{ name:"Знак «я тебе люблю»", def:"Ти супер",
+      how:"Витягніть великий, вказівний палець і мізинець одночасно (знак 🤟), середній і підмізинний стиснуті. Тримайте нерухомо." }
+  }
 }};
 
 /* EVERY default any version has ever shipped, per gesture, both languages.
@@ -440,41 +541,49 @@ const OLD_DEFS = {
 function T(){ return STR[cfg.lang] || STR.en; }
 
 /* ================= config ================= */
+const LANGS=["en","sv","uk"];
 const DEF_CFG = {
-  lang:"en", texts:{}, enabled:{}, voiceURI:"", rate:0.95, voiceGender:"auto",
+  lang:"en", textsByLang:{}, enabled:{}, voiceURI:"", rate:0.95, voiceGender:"auto",
   holdMs:700, yawThresh:0.22, pitchThresh:0.18, blinkMs:800, coolMs:3000, swapLR:false
 };
-// NOTE: defsVer deliberately NOT in DEF_CFG - a fresh config must start
-// unversioned so the one-time default-migration in loadCfg can run
-GESTURES.forEach(g => { DEF_CFG.texts[g.id]=STR.en.g[g.id].def; DEF_CFG.enabled[g.id]=true; });
+GESTURES.forEach(g => { DEF_CFG.enabled[g.id]=true; });
 let cfg = loadCfg();
+/* Phrases are stored PER LANGUAGE - each language always has its own
+   complete set, so defaults can never leak between languages. A custom
+   phrase belongs to the language it was typed in. */
 function loadCfg(){
   let c;
   try { c = Object.assign(JSON.parse(JSON.stringify(DEF_CFG)), JSON.parse(localStorage.getItem("commcfg")||"{}")); }
   catch(e){ c = JSON.parse(JSON.stringify(DEF_CFG)); }
-  // a saved config from an older version lacks gestures added since -
-  // give them their defaults instead of leaving them invisible
-  const lng=c.lang==="sv"?"sv":"en";
-  for(const g of GESTURES){
-    if(typeof c.enabled[g.id]==="undefined") c.enabled[g.id]=true;
-    if(typeof c.texts[g.id]==="undefined") c.texts[g.id]=STR[lng].g[g.id].def;
-    // defaults that changed between versions follow along (one-time)
-    if((c.defsVer||1)<3 && OLD_DEFS[g.id] && OLD_DEFS[g.id].includes(c.texts[g.id]))
-      c.texts[g.id]=STR[lng].g[g.id].def;
+  if(!LANGS.includes(c.lang)) c.lang="en";
+  if(!c.textsByLang || typeof c.textsByLang!=="object") c.textsByLang={};
+  for(const l of LANGS){
+    if(!c.textsByLang[l]) c.textsByLang[l]={};
+    for(const g of GESTURES){
+      if(typeof c.enabled[g.id]==="undefined") c.enabled[g.id]=true;
+      if(typeof c.textsByLang[l][g.id]==="undefined") c.textsByLang[l][g.id]=STR[l].g[g.id].def;
+    }
   }
-  c.defsVer=3;
+  // legacy single-map configs: carry over ONLY genuine custom phrases
+  // (anything that was ever a default just regenerates per language)
+  if(c.texts){
+    for(const g of GESTURES){
+      const old=c.texts[g.id];
+      if(typeof old==="string" && old &&
+         !(OLD_DEFS[g.id]||[]).includes(old) &&
+         !LANGS.some(l=>STR[l].g[g.id].def===old)){
+        c.textsByLang[c.lang][g.id]=old;
+      }
+    }
+    delete c.texts;
+  }
   return c;
 }
 function saveCfg(){ localStorage.setItem("commcfg", JSON.stringify(cfg)); }
+function TX(){ return cfg.textsByLang[cfg.lang]; }
 
-/* switching language: phrases still at the old default follow along,
-   customised phrases are kept */
 function switchLang(newLang){
   if(newLang===cfg.lang) return;
-  const old=cfg.lang;
-  for(const g of GESTURES){
-    if(cfg.texts[g.id]===STR[old].g[g.id].def) cfg.texts[g.id]=STR[newLang].g[g.id].def;
-  }
   cfg.lang=newLang;
   cfg.voiceURI="";           // re-pick the best voice for the new language
   saveCfg();
@@ -489,7 +598,10 @@ function applyLang(){
   const t=T();
   document.documentElement.lang=cfg.lang;
   $("hSub").textContent=t.sub;
-  document.querySelectorAll(".flag-btn").forEach(b=>{
+  document.querySelectorAll(".lang-card").forEach(c=>{
+    c.classList.toggle("active", c.dataset.card===cfg.lang);
+  });
+  document.querySelectorAll(".g-btn").forEach(b=>{
     b.classList.toggle("active", b.dataset.lang===cfg.lang && b.dataset.gender===cfg.voiceGender);
   });
   $("secGestures").textContent=t.secGestures;
@@ -540,8 +652,8 @@ const idb = {
 
 /* ================= speech ================= */
 let voices=[];
-const FEMALE_NAMES=/sofie|hillevi|female|zira|jenny|aria|libby|sonia|emma|michelle|ana\b|clara|hazel|susan|karen|serena|alva|elin|natasha|salli|astrid|amy|joanna|kendra|kimberly|catherine/i;
-const MALE_NAMES=/mattias|bengt|male\b|guy|ryan|thomas|william|christopher|eric|george|daniel|alex\b|fred|david|mark|james|oliver|brian|klaus|sven/i;
+const FEMALE_NAMES=/sofie|hillevi|female|zira|jenny|aria|libby|sonia|emma|michelle|ana\b|clara|hazel|susan|karen|serena|alva|elin|natasha|salli|astrid|amy|joanna|kendra|kimberly|catherine|polina|lesya|жіноч/i;
+const MALE_NAMES=/mattias|bengt|male\b|guy|ryan|thomas|william|christopher|eric|george|daniel|alex\b|fred|david|mark|james|oliver|brian|klaus|sven|ostap|чолов/i;
 function voiceGender(v){
   if(FEMALE_NAMES.test(v.name)) return "female";
   if(MALE_NAMES.test(v.name)) return "male";
@@ -558,8 +670,7 @@ function voiceScore(v){
   return s;
 }
 function langVoices(){
-  const pre=cfg.lang==="sv"?"sv":"en";
-  return voices.filter(v=>v.lang.toLowerCase().startsWith(pre));
+  return voices.filter(v=>v.lang.toLowerCase().startsWith(cfg.lang));
 }
 function pickVoice(force){
   const lv=langVoices().sort((a,b)=>voiceScore(b)-voiceScore(a));
@@ -583,7 +694,7 @@ function buildVoiceSel(){
   if(cfg.voiceURI) sel.value=cfg.voiceURI;
   const warn=$("voiceWarn");
   if(voices.length && !lv.length){
-    warn.textContent=cfg.lang==="sv"?T().voiceWarnSv:T().voiceWarn;
+    warn.textContent=T().voiceWarn;
     warn.classList.remove("hidden");
   } else warn.classList.add("hidden");
 }
@@ -591,7 +702,7 @@ function refreshVoices(){ voices=speechSynthesis.getVoices(); pickVoice(); }
 speechSynthesis.onvoiceschanged=refreshVoices;
 
 async function speak(gid){
-  const text=cfg.texts[gid]||"";
+  const text=TX()[gid]||"";
   const rec=await idb.get(gid);
   showSpoken(text);
   if(rec){
@@ -777,7 +888,7 @@ function buildMainChips(){
     c.className="cmd-card";
     c.innerHTML='<span class="cmd-ico">'+g.icon+'</span>'+
       '<div class="cmd-name">'+t.g[g.id].name+'</div>'+
-      '<div class="cmd-text">'+(cfg.texts[g.id]||"—")+'</div>'+
+      '<div class="cmd-text">'+(TX()[g.id]||"—")+'</div>'+
       '<span class="bar"><i></i></span>';
     row.appendChild(c); chipEls[g.id]=c;
   }
@@ -791,7 +902,7 @@ function buildInstructions(){
     const d=document.createElement("div");
     d.className="instr";
     d.innerHTML='<span class="ic">'+g.icon+'</span><div><b>'+t.g[g.id].name+
-      ' → “'+(cfg.texts[g.id]||"")+'”</b><p>'+t.g[g.id].how+'</p></div>';
+      ' → “'+(TX()[g.id]||"")+'”</b><p>'+t.g[g.id].how+'</p></div>';
     list.appendChild(d);
   }
 }
@@ -839,7 +950,7 @@ async function buildSettings(){
       '<span class="g-name">'+t.g[g.id].name+'</span>'+
       '<label class="switch"><input type="checkbox" data-en="'+g.id+'" '+(cfg.enabled[g.id]?"checked":"")+'><span class="tr"></span></label></div>'+
       '<div class="g-row">'+
-      '<input type="text" data-txt="'+g.id+'" value="'+(cfg.texts[g.id]||"").replace(/"/g,"&quot;")+'" placeholder="'+t.phrasePh+'">'+
+      '<input type="text" data-txt="'+g.id+'" value="'+(TX()[g.id]||"").replace(/"/g,"&quot;")+'" placeholder="'+t.phrasePh+'">'+
       '<button class="sm-btn" data-test="'+g.id+'" title="Test">▶</button>'+
       '<button class="sm-btn rec" data-rec="'+g.id+'" title="Record">🎤</button>'+
       (hasRec?'<button class="sm-btn" data-clr="'+g.id+'" title="Delete recording">✕</button>':"")+
@@ -848,7 +959,7 @@ async function buildSettings(){
     list.appendChild(card);
   }
   list.querySelectorAll("[data-en]").forEach(el=>el.onchange=()=>{ cfg.enabled[el.dataset.en]=el.checked; saveCfg(); buildMainChips(); });
-  list.querySelectorAll("[data-txt]").forEach(el=>el.onchange=()=>{ cfg.texts[el.dataset.txt]=el.value.trim(); saveCfg(); buildMainChips(); });
+  list.querySelectorAll("[data-txt]").forEach(el=>el.onchange=()=>{ TX()[el.dataset.txt]=el.value.trim(); saveCfg(); buildMainChips(); });
   list.querySelectorAll("[data-test]").forEach(el=>el.onclick=()=>speak(el.dataset.test));
   list.querySelectorAll("[data-rec]").forEach(el=>el.onclick=()=>toggleRecord(el.dataset.rec, el));
   list.querySelectorAll("[data-clr]").forEach(el=>el.onclick=async ()=>{ await idb.del(el.dataset.clr); toast(T().recGone); buildSettings(); });
@@ -867,7 +978,7 @@ function bindGlobal(){
   $("swapLR").onchange=e=>{ cfg.swapLR=e.target.checked; saveCfg(); };
   $("voiceSel").onchange=e=>{ cfg.voiceURI=e.target.value; saveCfg(); };
   $("genderSel").onchange=e=>{ cfg.voiceGender=e.target.value; saveCfg(); pickVoice(true); applyLang(); };
-  document.querySelectorAll(".flag-btn").forEach(b=>{
+  document.querySelectorAll(".g-btn").forEach(b=>{
     b.onclick=()=>{
       cfg.voiceGender=b.dataset.gender; saveCfg();
       if(b.dataset.lang!==cfg.lang){ switchLang(b.dataset.lang); }
@@ -883,8 +994,10 @@ function bindGlobal(){
   $("importFile").onchange=e=>{
     const f=e.target.files[0]; if(!f)return;
     const rd=new FileReader();
-    rd.onload=()=>{ try{ cfg=Object.assign(JSON.parse(JSON.stringify(DEF_CFG)), JSON.parse(rd.result));
-      saveCfg(); applyLang(); bindGlobal(); buildSettings(); buildMainChips(); pickVoice(); toast(T().cfgImported); }
+    rd.onload=()=>{ try{ JSON.parse(rd.result); // must be valid JSON
+      localStorage.setItem("commcfg", rd.result);
+      cfg=loadCfg(); saveCfg();  // loadCfg normalises old formats too
+      applyLang(); bindGlobal(); buildSettings(); buildMainChips(); pickVoice(); toast(T().cfgImported); }
       catch(err){ toast(T().cfgBad); } };
     rd.readAsText(f);
   };
