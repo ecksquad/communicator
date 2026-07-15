@@ -16,15 +16,27 @@
   body{display:flex;flex-direction:column;
     background:radial-gradient(80% 50% at 50% -10%, #12202c 0%, var(--bg) 60%)}
 
-  header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;flex:none}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;flex:none;
+    flex-wrap:wrap;row-gap:8px}
+  html,body{max-width:100%;overflow-x:hidden}
   .h-title{font-size:21px;font-weight:800;letter-spacing:.05em;
     background:linear-gradient(100deg,var(--ink) 40%,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
   .h-title small{display:block;font-size:10.5px;font-weight:650;color:var(--muted);letter-spacing:.22em;
     -webkit-text-fill-color:var(--muted)}
   .h-btns{display:flex;gap:8px}
   .icon-btn{min-width:50px;height:50px;border-radius:12px;border:1px solid var(--line);background:var(--panel);
-    color:var(--ink);font-size:21px;cursor:pointer;padding:0 14px}
+    color:var(--ink);font-size:21px;cursor:pointer;padding:0 14px;white-space:nowrap}
   .icon-btn.active{background:var(--accent);color:#02202b;border-color:var(--accent)}
+  .chipflag{width:30px;height:20px;border-radius:4px;vertical-align:middle}
+  .chipmark{margin-left:5px;font-size:15px;vertical-align:middle}
+  @media (max-width:879px){
+    .h-title{font-size:16px}
+    .h-title small{font-size:9px;letter-spacing:.16em}
+    .h-btns{gap:5px}
+    .icon-btn{min-width:40px;height:40px;font-size:17px;padding:0 8px;border-radius:10px}
+    .chipflag{width:24px;height:16px}
+    .chipmark{font-size:13px;margin-left:3px}
+  }
 
   main{flex:1;overflow-y:auto;padding:0 18px 28px}
   .view{max-width:1060px;margin:0 auto}
@@ -67,6 +79,21 @@
     .cols{flex-direction:row;align-items:flex-start}
     .stage{max-width:none;width:460px}
     .cmd-grid{flex:1}
+  }
+
+  /* phone: everything compact so the video AND all commands fit on screen */
+  @media (max-width:879px){
+    header{padding:10px 14px}
+    .stage{max-width:200px}
+    #spoken{min-height:64px;font-size:clamp(22px,7vw,30px);padding:8px 6px}
+    #spoken.dim{font-size:17px}
+    .cmd-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+    .cmd-card{padding:7px 10px;border-radius:10px}
+    .cmd-name{display:none}
+    .cmd-text{font-size:13.5px;margin-top:0;line-height:1.2}
+    .cmd-ico{font-size:17px;margin-left:4px}
+    .bigbtn{padding:13px;font-size:16px;margin-top:10px}
+    #log{font-size:12.5px;line-height:1.7}
   }
 
   .cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px;align-content:start}
@@ -146,6 +173,7 @@
 <header>
   <div class="h-title" id="hTitle">COMMUNICATOR<small id="hSub">MOVEMENT → VOICE</small></div>
   <div class="h-btns">
+    <button class="icon-btn lang-chip" id="langBtn" title="Language / voice"></button>
     <button class="icon-btn" id="helpBtn" title="Instructions">?</button>
     <button class="icon-btn" id="fsBtn" title="Fullscreen">⛶</button>
     <button class="icon-btn" id="viewBtn" title="Settings">⚙</button>
@@ -155,45 +183,6 @@
 <main>
   <!-- ================= MAIN VIEW ================= -->
   <div class="view" id="mainView">
-    <div class="lang-cards">
-      <div class="lang-card" data-card="en">
-        <svg class="flag" viewBox="0 0 60 40" aria-label="English">
-          <rect width="60" height="40" fill="#012169"/>
-          <path d="M0,0 L60,40 M60,0 L0,40" stroke="#ffffff" stroke-width="8"/>
-          <path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="4"/>
-          <path d="M30,0 V40 M0,20 H60" stroke="#ffffff" stroke-width="14"/>
-          <path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="8"/>
-        </svg>
-        <div class="lang-name">English</div>
-        <div class="gender-pair">
-          <button class="g-btn" data-lang="en" data-gender="male">Male</button>
-          <button class="g-btn" data-lang="en" data-gender="female">Female</button>
-        </div>
-      </div>
-      <div class="lang-card" data-card="sv">
-        <svg class="flag" viewBox="0 0 60 40" aria-label="Svenska">
-          <rect width="60" height="40" fill="#006AA7"/>
-          <rect x="18" width="8" height="40" fill="#FECC02"/>
-          <rect y="16" width="60" height="8" fill="#FECC02"/>
-        </svg>
-        <div class="lang-name">Svenska</div>
-        <div class="gender-pair">
-          <button class="g-btn" data-lang="sv" data-gender="male">Man</button>
-          <button class="g-btn" data-lang="sv" data-gender="female">Kvinna</button>
-        </div>
-      </div>
-      <div class="lang-card" data-card="uk">
-        <svg class="flag" viewBox="0 0 60 40" aria-label="Українська">
-          <rect width="60" height="20" fill="#0057B7"/>
-          <rect y="20" width="60" height="20" fill="#FFD700"/>
-        </svg>
-        <div class="lang-name">Українська</div>
-        <div class="gender-pair">
-          <button class="g-btn" data-lang="uk" data-gender="male">Чоловічий</button>
-          <button class="g-btn" data-lang="uk" data-gender="female">Жіночий</button>
-        </div>
-      </div>
-    </div>
     <div id="loading">Starting the camera and loading recognition …<br>
       <span style="font-size:13px">(the first time takes a while — the models are downloading)</span></div>
     <div id="spoken" class="dim hidden"></div>
@@ -287,6 +276,13 @@
     </div>
 
     <p class="footer-note" id="footNote"></p>
+  </div>
+
+  <!-- ================= LANGUAGE / VOICE PICKER ================= -->
+  <div class="modal-veil" id="langVeil">
+    <div class="modal">
+      <div class="lang-cards" id="langCards"></div>
+    </div>
   </div>
 
   <!-- ================= INSTRUCTIONS ================= -->
@@ -516,6 +512,186 @@ uk: {
     ILoveYou:{ name:"Знак «я тебе люблю»", def:"Ти супер",
       how:"Витягніть великий, вказівний палець і мізинець одночасно (знак 🤟), середній і підмізинний стиснуті. Тримайте нерухомо." }
   }
+},
+es: {
+  sub:"MOVIMIENTO → VOZ", ttsLang:"es-ES",
+  loading:"Iniciando la cámara y cargando el reconocimiento …<br><span style='font-size:13px'>(la primera vez tarda un poco — se están descargando los modelos)</span>",
+  loadFail:pre=>"No se pudo iniciar: "+pre+"<br><span style='font-size:13px'>Comprueba que la página puede usar la cámara (candado en la barra de direcciones).</span>",
+  waiting:"Esperando un movimiento …", seeing:"Te veo ✓", looking:"Buscando una cara …",
+  pause:"Pausar", resume:"Continuar",
+  secGestures:"Movimientos y frases", secVoice:"Voz", secSens:"Sensibilidad", secBackup:"Copia de seguridad",
+  voiceLbl:"Voz", voiceDesc:"Voz para las frases sin grabación propia",
+  rateLbl:"Velocidad",
+  genderLbl:"Tipo de voz", gAuto:"La mejor disponible", gFemale:"Mujer", gMale:"Hombre",
+  holdLbl:"Tiempo de retención", holdDesc:"Cuánto tiempo hay que mantener un movimiento",
+  yawLbl:"Giro de cabeza", yawDesc:"Cuánto hay que girar la cabeza hacia el lado",
+  pitchLbl:"Inclinación de cabeza", pitchDesc:"Cuánto hay que inclinar la cabeza arriba o abajo",
+  blinkLbl:"Duración del parpadeo", blinkDesc:"Cuánto dura un parpadeo intencionado (los naturales son ~0,2 s)",
+  coolLbl:"Descanso", coolDesc:"Pausa tras una frase antes de poder activar la siguiente",
+  swapLbl:"Invertir izquierda/derecha", swapDesc:"Si sí/no están al revés — activa esto",
+  exportLbl:"Exportar ajustes", exportDesc:"Guarda frases y sensibilidad en un archivo (sin grabaciones)",
+  exportBtn:"Exportar", importLbl:"Importar ajustes", importBtn:"Importar",
+  footNote:"Todo el reconocimiento ocurre localmente en el navegador — la imagen de la cámara nunca sale del dispositivo. «Voz propia»: pulsa 🎤 junto a una frase y grábala (con cualquier voz, por ejemplo la de un familiar). La grabación se reproduce en lugar de la voz del ordenador.",
+  phrasePh:"Escribe la frase que se dirá",
+  recSaved:"Grabación guardada — ahora suena en lugar de la voz del ordenador",
+  recStart:"Grabando … pulsa 🎤 otra vez para parar", recFail:"No se pudo iniciar el micrófono",
+  recExists:"Hay una grabación propia — <b>se reproduce en lugar de la voz del ordenador</b>", recGone:"Grabación eliminada",
+  cfgImported:"Ajustes importados", cfgBad:"No se pudo leer el archivo",
+  voiceWarn:"⚠ Este dispositivo no tiene voz en español instalada. Instálala en los ajustes de texto a voz del sistema.",
+  helpTitle:"Cómo hacerlo", helpClose:"Cerrar",
+  helpSub:"Mantén cada movimiento quieto hasta que se diga la frase — una barrita verde bajo la tarjeta muestra que el movimiento se está contando. Tras cada frase la aplicación descansa unos segundos.",
+  tips:"<b>Consejos para el mejor reconocimiento</b><br>• Siéntate con la cara en el centro de la imagen, a un brazo de distancia de la cámara.<br>• Buena luz de frente — evita ventanas o lámparas detrás.<br>• Muestra una mano cada vez, a la altura del pecho o la cara, con la palma hacia la cámara.<br>• Si sí/no están al revés: activa «Invertir izquierda/derecha» en los ajustes.<br>• ¿Demasiado sensible o lento? Ajusta el tiempo de retención y la sensibilidad.",
+  g:{
+    headRight:{ name:"Cabeza a la derecha", def:"Sí", how:"Gira la cabeza claramente a la derecha, como mirando por encima del hombro. Mantén hasta que se diga la frase (alrededor de un segundo) y vuelve al centro." },
+    headLeft:{ name:"Cabeza a la izquierda", def:"No", how:"Gira la cabeza claramente a la izquierda, como mirando por encima del hombro. Mantén hasta que se diga la frase y vuelve al centro." },
+    headUp:{ name:"Cabeza arriba", def:"Hola", how:"Inclina la cabeza hacia atrás, como mirando al techo. Mantén hasta que se diga la frase y vuelve al centro." },
+    headDown:{ name:"Cabeza abajo", def:"Adiós", how:"Baja la barbilla hacia el pecho, como mirando al regazo. Mantén hasta que se diga la frase y vuelve a subir." },
+    longBlink:{ name:"Parpadeo largo", def:"Te quiero", how:"Cierra los dos ojos y mantenlos cerrados alrededor de un segundo. Un parpadeo rápido normal nunca cuenta." },
+    browRaise:{ name:"Cejas levantadas", def:"Mírame", how:"Levanta bien las cejas, como cara de sorpresa, y mantén hasta que se diga la frase." },
+    mouthOpen:{ name:"Boca abierta", def:"Gracias", how:"Abre mucho la boca, como para un gran bocado, y mantenla abierta hasta que se diga la frase." },
+    Pointing_Up:{ name:"Un dedo", def:"Tengo hambre", how:"Levanta UN dedo índice hacia la cámara, los demás cerrados. Mantén la mano quieta." },
+    Victory:{ name:"Dos dedos", def:"Tengo sed", how:"Haz el signo de la paz: índice y corazón en V, los demás cerrados. Mantén quieto." },
+    Open_Palm:{ name:"Mano entera", def:"Ayuda", how:"Muestra la mano abierta hacia la cámara con los cinco dedos separados, como una señal de stop. Mantén quieta." },
+    Closed_Fist:{ name:"Puño cerrado", def:"Me duele", how:"Cierra la mano en un puño y mantenlo hacia la cámara, quieto." },
+    Thumb_Up:{ name:"Pulgar arriba", def:"Estoy bien", how:"Pulgar hacia arriba, los demás dedos cerrados. Mantén quieto." },
+    Thumb_Down:{ name:"Pulgar abajo", def:"No estoy bien", how:"Pulgar hacia abajo, los demás dedos cerrados. Mantén quieto." },
+    ILoveYou:{ name:"Signo de te quiero", def:"Eres genial", how:"Extiende pulgar, índice y meñique a la vez (el signo 🤟), corazón y anular cerrados. Mantén quieto." }
+  }
+},
+de: {
+  sub:"BEWEGUNG → STIMME", ttsLang:"de-DE",
+  loading:"Kamera wird gestartet und Erkennung geladen …<br><span style='font-size:13px'>(beim ersten Mal dauert es etwas — die Modelle werden heruntergeladen)</span>",
+  loadFail:pre=>"Konnte nicht starten: "+pre+"<br><span style='font-size:13px'>Prüfe, ob die Seite die Kamera verwenden darf (Schloss in der Adressleiste).</span>",
+  waiting:"Warte auf eine Bewegung …", seeing:"Ich sehe dich ✓", looking:"Suche ein Gesicht …",
+  pause:"Pausieren", resume:"Fortsetzen",
+  secGestures:"Bewegungen und Sätze", secVoice:"Stimme", secSens:"Empfindlichkeit", secBackup:"Sicherung",
+  voiceLbl:"Stimme", voiceDesc:"Vorlesestimme für Sätze ohne eigene Aufnahme",
+  rateLbl:"Geschwindigkeit",
+  genderLbl:"Stimmtyp", gAuto:"Beste verfügbare", gFemale:"Weiblich", gMale:"Männlich",
+  holdLbl:"Haltezeit", holdDesc:"Wie lange eine Bewegung gehalten werden muss",
+  yawLbl:"Kopfdrehung", yawDesc:"Wie weit der Kopf zur Seite gedreht werden muss",
+  pitchLbl:"Kopfneigung", pitchDesc:"Wie weit der Kopf nach oben oder unten geneigt werden muss",
+  blinkLbl:"Blinzeldauer", blinkDesc:"Wie lange ein absichtliches Blinzeln dauert (natürlich ~0,2 s)",
+  coolLbl:"Ruhezeit", coolDesc:"Pause nach einem Satz, bevor der nächste ausgelöst werden kann",
+  swapLbl:"Links/rechts tauschen", swapDesc:"Wenn Ja/Nein spiegelverkehrt wirken — hier einschalten",
+  exportLbl:"Einstellungen exportieren", exportDesc:"Speichert Sätze und Empfindlichkeit als Datei (ohne Aufnahmen)",
+  exportBtn:"Exportieren", importLbl:"Einstellungen importieren", importBtn:"Importieren",
+  footNote:"Die gesamte Erkennung läuft lokal im Browser — das Kamerabild verlässt das Gerät nie. „Eigene Stimme“: 🎤 neben einem Satz drücken und ihn aufnehmen (mit jeder beliebigen Stimme, z. B. eines Angehörigen). Die Aufnahme wird statt der Computerstimme abgespielt.",
+  phrasePh:"Satz eingeben, der gesagt werden soll",
+  recSaved:"Aufnahme gespeichert — sie wird jetzt statt der Computerstimme abgespielt",
+  recStart:"Aufnahme läuft … 🎤 erneut drücken zum Stoppen", recFail:"Mikrofon konnte nicht gestartet werden",
+  recExists:"Eigene Aufnahme vorhanden — <b>sie wird statt der Computerstimme abgespielt</b>", recGone:"Aufnahme gelöscht",
+  cfgImported:"Einstellungen importiert", cfgBad:"Datei konnte nicht gelesen werden",
+  voiceWarn:"⚠ Auf diesem Gerät ist keine deutsche Stimme installiert. Installiere eine in den Text-zu-Sprache-Einstellungen des Systems.",
+  helpTitle:"So geht es", helpClose:"Schließen",
+  helpSub:"Halte jede Bewegung still, bis der Satz gesagt wird — ein kleiner grüner Balken unter der Karte zeigt, dass die Bewegung gezählt wird. Nach jedem Satz ruht die App ein paar Sekunden.",
+  tips:"<b>Tipps für die beste Erkennung</b><br>• Sitze mit dem Gesicht in der Bildmitte, etwa eine Armlänge von der Kamera entfernt.<br>• Gutes Licht von vorn — Fenster oder Lampen hinter dir vermeiden.<br>• Zeige eine Hand auf einmal, auf Brust- oder Gesichtshöhe, Handfläche zur Kamera.<br>• Wenn Ja/Nein spiegelverkehrt wirken: „Links/rechts tauschen“ in den Einstellungen aktivieren.<br>• Zu empfindlich oder zu träge? Haltezeit und Empfindlichkeit anpassen.",
+  g:{
+    headRight:{ name:"Kopf nach rechts", def:"Ja", how:"Drehe den Kopf deutlich nach rechts, als würdest du über die Schulter schauen. Halte, bis der Satz gesagt wird (etwa eine Sekunde), und drehe dann zur Mitte zurück." },
+    headLeft:{ name:"Kopf nach links", def:"Nein", how:"Drehe den Kopf deutlich nach links, als würdest du über die Schulter schauen. Halte, bis der Satz gesagt wird, und drehe dann zur Mitte zurück." },
+    headUp:{ name:"Kopf nach oben", def:"Hallo", how:"Neige den Kopf nach hinten, als würdest du zur Decke schauen. Halte, bis der Satz gesagt wird, und komm zur Mitte zurück." },
+    headDown:{ name:"Kopf nach unten", def:"Tschüss", how:"Senke das Kinn zur Brust, als würdest du in den Schoß schauen. Halte, bis der Satz gesagt wird, und hebe den Kopf wieder." },
+    longBlink:{ name:"Langes Blinzeln", def:"Ich liebe dich", how:"Schließe beide Augen und halte sie etwa eine Sekunde geschlossen. Ein normales schnelles Blinzeln zählt nie." },
+    browRaise:{ name:"Hochgezogene Augenbrauen", def:"Schau her", how:"Ziehe die Augenbrauen deutlich hoch, wie ein überraschtes Gesicht, und halte, bis der Satz gesagt wird." },
+    mouthOpen:{ name:"Offener Mund", def:"Danke", how:"Öffne den Mund weit, wie für einen großen Bissen, und halte ihn offen, bis der Satz gesagt wird." },
+    Pointing_Up:{ name:"Ein Finger", def:"Ich habe Hunger", how:"Halte EINEN Zeigefinger gerade nach oben zur Kamera, die anderen Finger geschlossen. Halte die Hand still." },
+    Victory:{ name:"Zwei Finger", def:"Ich habe Durst", how:"Mache ein Peace-Zeichen: Zeige- und Mittelfinger als V gestreckt, die anderen geschlossen. Halte still." },
+    Open_Palm:{ name:"Ganze Hand", def:"Hilfe", how:"Zeige die ganze offene Hand zur Kamera mit allen fünf Fingern gespreizt, wie ein Stoppzeichen. Halte still." },
+    Closed_Fist:{ name:"Geschlossene Faust", def:"Ich habe Schmerzen", how:"Balle die Hand zur Faust und halte sie still zur Kamera." },
+    Thumb_Up:{ name:"Daumen hoch", def:"Mir geht es gut", how:"Daumen nach oben, die anderen Finger geschlossen. Halte still." },
+    Thumb_Down:{ name:"Daumen runter", def:"Mir geht es nicht gut", how:"Daumen nach unten, die anderen Finger geschlossen. Halte still." },
+    ILoveYou:{ name:"Ich-liebe-dich-Zeichen", def:"Du bist super", how:"Strecke Daumen, Zeigefinger und kleinen Finger gleichzeitig (das 🤟-Zeichen), Mittel- und Ringfinger geschlossen. Halte still." }
+  }
+},
+fr: {
+  sub:"MOUVEMENT → VOIX", ttsLang:"fr-FR",
+  loading:"Démarrage de la caméra et chargement de la reconnaissance …<br><span style='font-size:13px'>(la première fois prend un moment — les modèles se téléchargent)</span>",
+  loadFail:pre=>"Impossible de démarrer : "+pre+"<br><span style='font-size:13px'>Vérifie que la page peut utiliser la caméra (cadenas dans la barre d'adresse).</span>",
+  waiting:"En attente d'un mouvement …", seeing:"Je te vois ✓", looking:"Recherche d'un visage …",
+  pause:"Mettre en pause", resume:"Reprendre",
+  secGestures:"Mouvements et phrases", secVoice:"Voix", secSens:"Sensibilité", secBackup:"Sauvegarde",
+  voiceLbl:"Voix", voiceDesc:"Voix de lecture pour les phrases sans enregistrement",
+  rateLbl:"Vitesse",
+  genderLbl:"Type de voix", gAuto:"Meilleure disponible", gFemale:"Femme", gMale:"Homme",
+  holdLbl:"Temps de maintien", holdDesc:"Combien de temps il faut tenir un mouvement",
+  yawLbl:"Rotation de la tête", yawDesc:"De combien il faut tourner la tête sur le côté",
+  pitchLbl:"Inclinaison de la tête", pitchDesc:"De combien il faut incliner la tête en haut ou en bas",
+  blinkLbl:"Durée du clignement", blinkDesc:"Durée d'un clignement volontaire (les naturels font ~0,2 s)",
+  coolLbl:"Repos", coolDesc:"Pause après une phrase avant de pouvoir déclencher la suivante",
+  swapLbl:"Inverser gauche/droite", swapDesc:"Si oui/non semblent inversés — active ceci",
+  exportLbl:"Exporter les réglages", exportDesc:"Enregistre phrases et sensibilité dans un fichier (sans les enregistrements audio)",
+  exportBtn:"Exporter", importLbl:"Importer les réglages", importBtn:"Importer",
+  footNote:"Toute la reconnaissance se fait localement dans le navigateur — l'image de la caméra ne quitte jamais l'appareil. « Voix personnelle » : appuie sur 🎤 à côté d'une phrase et enregistre-la (avec n'importe quelle voix, par exemple celle d'un proche). L'enregistrement est joué à la place de la voix de l'ordinateur.",
+  phrasePh:"Écris la phrase à dire",
+  recSaved:"Enregistrement sauvegardé — il est joué à la place de la voix de l'ordinateur",
+  recStart:"Enregistrement … appuie encore sur 🎤 pour arrêter", recFail:"Impossible de démarrer le micro",
+  recExists:"Enregistrement personnel présent — <b>il est joué à la place de la voix de l'ordinateur</b>", recGone:"Enregistrement supprimé",
+  cfgImported:"Réglages importés", cfgBad:"Impossible de lire le fichier",
+  voiceWarn:"⚠ Aucune voix française n'est installée sur cet appareil. Installe-en une dans les réglages de synthèse vocale du système.",
+  helpTitle:"Comment faire", helpClose:"Fermer",
+  helpSub:"Tiens chaque mouvement immobile jusqu'à ce que la phrase soit dite — une petite barre verte sous la carte montre que le mouvement est compté. Après chaque phrase, l'application se repose quelques secondes.",
+  tips:"<b>Conseils pour la meilleure reconnaissance</b><br>• Assieds-toi avec le visage au centre de l'image, à environ un bras de la caméra.<br>• Bonne lumière de face — évite fenêtres ou lampes derrière toi.<br>• Montre une main à la fois, à hauteur de poitrine ou de visage, paume vers la caméra.<br>• Si oui/non semblent inversés : active « Inverser gauche/droite » dans les réglages.<br>• Trop sensible ou trop lent ? Ajuste le temps de maintien et la sensibilité.",
+  g:{
+    headRight:{ name:"Tête à droite", def:"Oui", how:"Tourne la tête nettement à droite, comme pour regarder par-dessus l'épaule. Tiens jusqu'à ce que la phrase soit dite (environ une seconde), puis reviens au centre." },
+    headLeft:{ name:"Tête à gauche", def:"Non", how:"Tourne la tête nettement à gauche, comme pour regarder par-dessus l'épaule. Tiens jusqu'à ce que la phrase soit dite, puis reviens au centre." },
+    headUp:{ name:"Tête en haut", def:"Bonjour", how:"Incline la tête en arrière, comme pour regarder le plafond. Tiens jusqu'à ce que la phrase soit dite, puis reviens au centre." },
+    headDown:{ name:"Tête en bas", def:"Au revoir", how:"Baisse le menton vers la poitrine, comme pour regarder tes genoux. Tiens jusqu'à ce que la phrase soit dite, puis relève la tête." },
+    longBlink:{ name:"Long clignement", def:"Je t'aime", how:"Ferme les deux yeux et garde-les fermés environ une seconde. Un clignement rapide normal ne compte jamais." },
+    browRaise:{ name:"Sourcils levés", def:"Regarde-moi", how:"Lève bien les sourcils, comme un visage surpris, et tiens jusqu'à ce que la phrase soit dite." },
+    mouthOpen:{ name:"Bouche ouverte", def:"Merci", how:"Ouvre grand la bouche, comme pour une grosse bouchée, et garde-la ouverte jusqu'à ce que la phrase soit dite." },
+    Pointing_Up:{ name:"Un doigt", def:"J'ai faim", how:"Lève UN index vers la caméra, les autres doigts fermés. Garde la main immobile." },
+    Victory:{ name:"Deux doigts", def:"J'ai soif", how:"Fais le signe de la paix : index et majeur tendus en V, les autres fermés. Reste immobile." },
+    Open_Palm:{ name:"Main entière", def:"À l'aide", how:"Montre la main ouverte vers la caméra, les cinq doigts écartés, comme un signe stop. Reste immobile." },
+    Closed_Fist:{ name:"Poing fermé", def:"J'ai mal", how:"Ferme la main en poing et tiens-le vers la caméra, immobile." },
+    Thumb_Up:{ name:"Pouce en haut", def:"Je vais bien", how:"Pouce vers le haut, les autres doigts fermés. Reste immobile." },
+    Thumb_Down:{ name:"Pouce en bas", def:"Je ne vais pas bien", how:"Pouce vers le bas, les autres doigts fermés. Reste immobile." },
+    ILoveYou:{ name:"Signe je t'aime", def:"Tu es génial", how:"Tends le pouce, l'index et l'auriculaire en même temps (le signe 🤟), majeur et annulaire fermés. Reste immobile." }
+  }
+},
+pl: {
+  sub:"RUCH → GŁOS", ttsLang:"pl-PL",
+  loading:"Uruchamianie kamery i ładowanie rozpoznawania …<br><span style='font-size:13px'>(za pierwszym razem trwa to dłużej — pobierane są modele)</span>",
+  loadFail:pre=>"Nie udało się uruchomić: "+pre+"<br><span style='font-size:13px'>Sprawdź, czy strona może używać kamery (kłódka w pasku adresu).</span>",
+  waiting:"Czekam na ruch …", seeing:"Widzę cię ✓", looking:"Szukam twarzy …",
+  pause:"Wstrzymaj", resume:"Wznów",
+  secGestures:"Ruchy i frazy", secVoice:"Głos", secSens:"Czułość", secBackup:"Kopia zapasowa",
+  voiceLbl:"Głos", voiceDesc:"Głos dla fraz bez własnego nagrania",
+  rateLbl:"Szybkość",
+  genderLbl:"Rodzaj głosu", gAuto:"Najlepszy dostępny", gFemale:"Żeński", gMale:"Męski",
+  holdLbl:"Czas przytrzymania", holdDesc:"Jak długo trzeba utrzymać ruch, aby się liczył",
+  yawLbl:"Obrót głowy", yawDesc:"Jak mocno trzeba obrócić głowę w bok",
+  pitchLbl:"Pochylenie głowy", pitchDesc:"Jak mocno trzeba pochylić głowę w górę lub w dół",
+  blinkLbl:"Długość mrugnięcia", blinkDesc:"Jak długo trwa celowe mrugnięcie (naturalne to ~0,2 s)",
+  coolLbl:"Odpoczynek", coolDesc:"Przerwa po frazie, zanim można wywołać następną",
+  swapLbl:"Zamień lewo/prawo", swapDesc:"Jeśli tak/nie są odwrócone — włącz to",
+  exportLbl:"Eksport ustawień", exportDesc:"Zapisuje frazy i czułość do pliku (bez nagrań audio)",
+  exportBtn:"Eksportuj", importLbl:"Import ustawień", importBtn:"Importuj",
+  footNote:"Całe rozpoznawanie odbywa się lokalnie w przeglądarce — obraz z kamery nigdy nie opuszcza urządzenia. „Własny głos”: naciśnij 🎤 przy frazie i nagraj ją (dowolnym głosem, np. bliskiej osoby). Nagranie odtwarzane jest zamiast głosu komputera.",
+  phrasePh:"Wpisz frazę do wypowiedzenia",
+  recSaved:"Nagranie zapisane — teraz odtwarzane jest zamiast głosu komputera",
+  recStart:"Nagrywanie … naciśnij 🎤 ponownie, aby zatrzymać", recFail:"Nie udało się uruchomić mikrofonu",
+  recExists:"Jest własne nagranie — <b>odtwarzane jest zamiast głosu komputera</b>", recGone:"Nagranie usunięte",
+  cfgImported:"Ustawienia zaimportowane", cfgBad:"Nie udało się odczytać pliku",
+  voiceWarn:"⚠ Na tym urządzeniu nie ma polskiego głosu. Zainstaluj go w ustawieniach syntezy mowy systemu.",
+  helpTitle:"Jak to robić", helpClose:"Zamknij",
+  helpSub:"Trzymaj każdy ruch nieruchomo, aż fraza zostanie wypowiedziana — mały zielony pasek pod kartą pokazuje, że ruch jest zaliczany. Po każdej frazie aplikacja odpoczywa kilka sekund.",
+  tips:"<b>Wskazówki dla najlepszego rozpoznawania</b><br>• Usiądź z twarzą pośrodku obrazu, mniej więcej na wyciągnięcie ręki od kamery.<br>• Dobre światło z przodu — unikaj okien i lamp za plecami.<br>• Pokazuj jedną rękę naraz, na wysokości klatki piersiowej lub twarzy, dłonią do kamery.<br>• Jeśli tak/nie są odwrócone: włącz „Zamień lewo/prawo” w ustawieniach.<br>• Za czuło albo za wolno? Dostosuj czas przytrzymania i czułość.",
+  g:{
+    headRight:{ name:"Głowa w prawo", def:"Tak", how:"Wyraźnie obróć głowę w prawo, jakbyś patrzył przez ramię. Trzymaj, aż fraza zostanie wypowiedziana (około sekundy), potem wróć do środka." },
+    headLeft:{ name:"Głowa w lewo", def:"Nie", how:"Wyraźnie obróć głowę w lewo, jakbyś patrzył przez ramię. Trzymaj, aż fraza zostanie wypowiedziana, potem wróć do środka." },
+    headUp:{ name:"Głowa w górę", def:"Cześć", how:"Odchyl głowę do tyłu, jakbyś patrzył w sufit. Trzymaj, aż fraza zostanie wypowiedziana, potem wróć do środka." },
+    headDown:{ name:"Głowa w dół", def:"Do widzenia", how:"Opuść brodę do klatki piersiowej, jakbyś patrzył na kolana. Trzymaj, aż fraza zostanie wypowiedziana, potem podnieś głowę." },
+    longBlink:{ name:"Długie mrugnięcie", def:"Kocham cię", how:"Zamknij oboje oczu i trzymaj je zamknięte około sekundy. Zwykłe szybkie mrugnięcie nigdy się nie liczy." },
+    browRaise:{ name:"Uniesione brwi", def:"Spójrz tutaj", how:"Wyraźnie unieś brwi, jak zdziwiona twarz, i trzymaj, aż fraza zostanie wypowiedziana." },
+    mouthOpen:{ name:"Otwarte usta", def:"Dziękuję", how:"Otwórz szeroko usta, jak do dużego kęsa, i trzymaj otwarte, aż fraza zostanie wypowiedziana." },
+    Pointing_Up:{ name:"Jeden palec", def:"Chcę jeść", how:"Trzymaj JEDEN palec wskazujący w górę do kamery, pozostałe palce zamknięte. Trzymaj rękę nieruchomo." },
+    Victory:{ name:"Dwa palce", def:"Chcę pić", how:"Zrób znak pokoju: palec wskazujący i środkowy w V, pozostałe zamknięte. Trzymaj nieruchomo." },
+    Open_Palm:{ name:"Cała dłoń", def:"Pomocy", how:"Pokaż otwartą dłoń do kamery, wszystkie pięć palców rozstawionych, jak znak stop. Trzymaj nieruchomo." },
+    Closed_Fist:{ name:"Zaciśnięta pięść", def:"Boli mnie", how:"Zaciśnij dłoń w pięść i trzymaj ją nieruchomo do kamery." },
+    Thumb_Up:{ name:"Kciuk w górę", def:"Czuję się dobrze", how:"Kciuk w górę, pozostałe palce zamknięte. Trzymaj nieruchomo." },
+    Thumb_Down:{ name:"Kciuk w dół", def:"Czuję się źle", how:"Kciuk w dół, pozostałe palce zamknięte. Trzymaj nieruchomo." },
+    ILoveYou:{ name:"Znak kocham cię", def:"Jesteś super", how:"Wyprostuj kciuk, palec wskazujący i mały palec jednocześnie (znak 🤟), środkowy i serdeczny zamknięte. Trzymaj nieruchomo." }
+  }
 }};
 
 /* EVERY default any version has ever shipped, per gesture, both languages.
@@ -541,7 +717,27 @@ const OLD_DEFS = {
 function T(){ return STR[cfg.lang] || STR.en; }
 
 /* ================= config ================= */
-const LANGS=["en","sv","uk"];
+const LANGS=["en","sv","uk","es","de","fr","pl"];
+
+/* flags as inline SVG (flag emoji don't render on Windows) + native labels */
+const FLAGS={
+  en:'<rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#fff" stroke-width="8"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="4"/><path d="M30,0 V40 M0,20 H60" stroke="#fff" stroke-width="14"/><path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="8"/>',
+  sv:'<rect width="60" height="40" fill="#006AA7"/><rect x="18" width="8" height="40" fill="#FECC02"/><rect y="16" width="60" height="8" fill="#FECC02"/>',
+  uk:'<rect width="60" height="20" fill="#0057B7"/><rect y="20" width="60" height="20" fill="#FFD700"/>',
+  es:'<rect width="60" height="40" fill="#AA151B"/><rect y="10" width="60" height="20" fill="#F1BF00"/>',
+  de:'<rect width="60" height="13.3" fill="#000"/><rect y="13.3" width="60" height="13.4" fill="#DD0000"/><rect y="26.7" width="60" height="13.3" fill="#FFCE00"/>',
+  fr:'<rect width="20" height="40" fill="#002395"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#ED2939"/>',
+  pl:'<rect width="60" height="20" fill="#fff"/><rect y="20" width="60" height="20" fill="#DC143C"/>'
+};
+const LANG_META={
+  en:{ name:"English",    male:"Male",      female:"Female"  },
+  sv:{ name:"Svenska",    male:"Man",       female:"Kvinna"  },
+  uk:{ name:"Українська", male:"Чоловічий", female:"Жіночий" },
+  es:{ name:"Español",    male:"Hombre",    female:"Mujer"   },
+  de:{ name:"Deutsch",    male:"Männlich",  female:"Weiblich"},
+  fr:{ name:"Français",   male:"Homme",     female:"Femme"   },
+  pl:{ name:"Polski",     male:"Męski",     female:"Żeński"  }
+};
 const DEF_CFG = {
   lang:"en", textsByLang:{}, enabled:{}, voiceURI:"", rate:0.95, voiceGender:"auto",
   holdMs:700, yawThresh:0.22, pitchThresh:0.18, blinkMs:800, coolMs:3000, swapLR:false
@@ -598,12 +794,7 @@ function applyLang(){
   const t=T();
   document.documentElement.lang=cfg.lang;
   $("hSub").textContent=t.sub;
-  document.querySelectorAll(".lang-card").forEach(c=>{
-    c.classList.toggle("active", c.dataset.card===cfg.lang);
-  });
-  document.querySelectorAll(".g-btn").forEach(b=>{
-    b.classList.toggle("active", b.dataset.lang===cfg.lang && b.dataset.gender===cfg.voiceGender);
-  });
+  buildLangPicker();
   $("secGestures").textContent=t.secGestures;
   $("secVoice").textContent=t.secVoice;
   $("secSens").textContent=t.secSens;
@@ -652,8 +843,8 @@ const idb = {
 
 /* ================= speech ================= */
 let voices=[];
-const FEMALE_NAMES=/sofie|hillevi|female|zira|jenny|aria|libby|sonia|emma|michelle|ana\b|clara|hazel|susan|karen|serena|alva|elin|natasha|salli|astrid|amy|joanna|kendra|kimberly|catherine|polina|lesya|жіноч/i;
-const MALE_NAMES=/mattias|bengt|male\b|guy|ryan|thomas|william|christopher|eric|george|daniel|alex\b|fred|david|mark|james|oliver|brian|klaus|sven|ostap|чолов/i;
+const FEMALE_NAMES=/sofie|hillevi|female|zira|jenny|aria|libby|sonia|emma|michelle|ana\b|clara|hazel|susan|karen|serena|alva|elin|natasha|salli|astrid|amy|joanna|kendra|kimberly|catherine|polina|lesya|жіноч|helena|laura|paloma|lucia|elvira|katja|hedda|marlene|vicki|amala|denise|eloise|celine|julie|lea\b|zofia|ewa\b|maja|agnieszka|paulina/i;
+const MALE_NAMES=/mattias|bengt|male\b|guy|ryan|thomas|william|christopher|eric|george|daniel|alex\b|fred|david|mark|james|oliver|brian|klaus|sven|ostap|чолов|pablo|raul|alvaro|jorge|enrique|stefan|conrad|bernd|hans|killian|henri|mathieu|yves|remy|antoine|claude\b|marek|jacek|krzysztof/i;
 function voiceGender(v){
   if(FEMALE_NAMES.test(v.name)) return "female";
   if(MALE_NAMES.test(v.name)) return "male";
@@ -894,6 +1085,36 @@ function buildMainChips(){
   }
 }
 
+/* language/voice picker (modal) + the header chip that opens it */
+function buildLangPicker(){
+  const box=$("langCards"); box.innerHTML="";
+  for(const l of LANGS){
+    const card=document.createElement("div");
+    card.className="lang-card"+(l===cfg.lang?" active":"");
+    card.dataset.card=l;
+    card.innerHTML='<svg class="flag" viewBox="0 0 60 40">'+FLAGS[l]+'</svg>'+
+      '<div class="lang-name">'+LANG_META[l].name+'</div>'+
+      '<div class="gender-pair">'+
+      '<button class="g-btn'+(l===cfg.lang&&cfg.voiceGender==="male"?" active":"")+'" data-lang="'+l+'" data-gender="male">'+LANG_META[l].male+'</button>'+
+      '<button class="g-btn'+(l===cfg.lang&&cfg.voiceGender==="female"?" active":"")+'" data-lang="'+l+'" data-gender="female">'+LANG_META[l].female+'</button>'+
+      '</div>';
+    box.appendChild(card);
+  }
+  box.querySelectorAll(".g-btn").forEach(b=>{
+    b.onclick=()=>{
+      cfg.voiceGender=b.dataset.gender; saveCfg();
+      if(b.dataset.lang!==cfg.lang){ switchLang(b.dataset.lang); }
+      else { pickVoice(true); applyLang(); buildMainChips(); }
+      buildLangPicker();
+      $("langVeil").classList.remove("show");
+    };
+  });
+  // header chip: current flag + gender mark
+  const gmark=cfg.voiceGender==="female"?"♀":(cfg.voiceGender==="male"?"♂":"");
+  $("langBtn").innerHTML='<svg class="chipflag" viewBox="0 0 60 40">'+FLAGS[cfg.lang]+'</svg>'+
+    (gmark?'<span class="chipmark">'+gmark+'</span>':"");
+}
+
 function buildInstructions(){
   const list=$("instrList"); list.innerHTML="";
   const t=T();
@@ -978,13 +1199,8 @@ function bindGlobal(){
   $("swapLR").onchange=e=>{ cfg.swapLR=e.target.checked; saveCfg(); };
   $("voiceSel").onchange=e=>{ cfg.voiceURI=e.target.value; saveCfg(); };
   $("genderSel").onchange=e=>{ cfg.voiceGender=e.target.value; saveCfg(); pickVoice(true); applyLang(); };
-  document.querySelectorAll(".g-btn").forEach(b=>{
-    b.onclick=()=>{
-      cfg.voiceGender=b.dataset.gender; saveCfg();
-      if(b.dataset.lang!==cfg.lang){ switchLang(b.dataset.lang); }
-      else { pickVoice(true); applyLang(); buildMainChips(); }
-    };
-  });
+  $("langBtn").onclick=()=>$("langVeil").classList.add("show");
+  $("langVeil").onclick=e=>{ if(e.target===$("langVeil")) $("langVeil").classList.remove("show"); };
   $("exportBtn").onclick=()=>{
     const a=document.createElement("a");
     a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(cfg,null,2));
