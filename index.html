@@ -149,8 +149,10 @@
   <!-- ================= MAIN VIEW ================= -->
   <div class="view" id="mainView">
     <div class="flag-row">
-      <button class="flag-btn" id="flagEn" data-lang="en">🇬🇧 English</button>
-      <button class="flag-btn" id="flagSv" data-lang="sv">🇸🇪 Svenska</button>
+      <button class="flag-btn" data-lang="en" data-gender="male">🇬🇧 Male</button>
+      <button class="flag-btn" data-lang="en" data-gender="female">🇬🇧 Female</button>
+      <button class="flag-btn" data-lang="sv" data-gender="male">🇸🇪 Man</button>
+      <button class="flag-btn" data-lang="sv" data-gender="female">🇸🇪 Kvinna</button>
     </div>
     <div id="loading">Starting the camera and loading recognition …<br>
       <span style="font-size:13px">(the first time takes a while — the models are downloading)</span></div>
@@ -212,7 +214,7 @@
       </div>
       <div class="set-row">
         <label id="pitchLbl"><span class="d" id="pitchDesc"></span></label>
-        <input type="range" id="pitchRange" min="0.06" max="0.25" step="0.01">
+        <input type="range" id="pitchRange" min="0.08" max="0.40" step="0.01">
         <span class="val" id="pitchVal"></span>
       </div>
       <div class="set-row">
@@ -329,15 +331,15 @@ en: {
       how:"Tilt your head back so you look up towards the ceiling. Hold until the phrase is spoken, then come back to the middle." },
     headDown:{ name:"Head down", def:"I'm not good",
       how:"Lower your chin towards your chest, as if looking down into your lap. Hold until the phrase is spoken, then come back up." },
-    longBlink:{ name:"Long blink", def:"Thank you",
+    longBlink:{ name:"Long blink", def:"I love you",
       how:"Close both eyes and keep them closed for about a second. A normal quick blink never counts — it is the long closing that triggers the phrase." },
     browRaise:{ name:"Raised eyebrows", def:"Look here",
       how:"Raise your eyebrows properly, like a surprised face, and hold until the phrase is spoken." },
-    mouthOpen:{ name:"Open mouth", def:"I'm hungry",
+    mouthOpen:{ name:"Open mouth", def:"Thank you",
       how:"Open your mouth wide, as for a big bite, and hold it open until the phrase is spoken." },
-    Pointing_Up:{ name:"One finger", def:"I'm thirsty",
+    Pointing_Up:{ name:"One finger", def:"I'm hungry",
       how:"Hold up ONE index finger straight up towards the camera, other fingers closed. Keep the hand still until the phrase is spoken." },
-    Victory:{ name:"Two fingers", def:"I need the toilet",
+    Victory:{ name:"Two fingers", def:"I'm thirsty",
       how:"Make a peace sign: index and middle finger stretched out in a V, other fingers closed. Hold still." },
     Open_Palm:{ name:"Whole hand", def:"Help",
       how:"Show your whole open hand towards the camera with all five fingers spread, like a stop signal. Hold still." },
@@ -347,7 +349,7 @@ en: {
       how:"Thumb up, other fingers closed. Hold still." },
     Thumb_Down:{ name:"Thumb down", def:"No thanks",
       how:"Thumb down, other fingers closed. Hold still." },
-    ILoveYou:{ name:"I-love-you sign", def:"I love you",
+    ILoveYou:{ name:"I-love-you sign", def:"You're the best",
       how:"Stretch out thumb, index finger and little finger at the same time (the 🤟 sign), middle and ring finger closed. Hold still." }
   }
 },
@@ -392,15 +394,15 @@ sv: {
       how:"Luta huvudet bakåt så att du tittar upp mot taket. Håll kvar tills frasen sägs, och kom sedan tillbaka till mitten." },
     headDown:{ name:"Huvud neråt", def:"Jag mår inte bra",
       how:"Sänk hakan mot bröstet, som att du tittar ner i knät. Håll kvar tills frasen sägs, och kom sedan upp igen." },
-    longBlink:{ name:"Lång blinkning", def:"Tack",
+    longBlink:{ name:"Lång blinkning", def:"Jag älskar dig",
       how:"Blunda med båda ögonen och håll dem stängda i ungefär en sekund. En vanlig snabb blinkning räknas aldrig — det är den långa blundningen som utlöser frasen." },
     browRaise:{ name:"Höjda ögonbryn", def:"Titta hit",
       how:"Höj ögonbrynen ordentligt, som en förvånad min, och håll kvar tills frasen sägs." },
-    mouthOpen:{ name:"Öppen mun", def:"Jag är hungrig",
+    mouthOpen:{ name:"Öppen mun", def:"Tack",
       how:"Gapa stort, som för en stor tugga, och håll munnen öppen tills frasen sägs." },
-    Pointing_Up:{ name:"Ett finger", def:"Jag är törstig",
+    Pointing_Up:{ name:"Ett finger", def:"Jag är hungrig",
       how:"Håll upp ETT pekfinger rakt upp mot kameran, med de andra fingrarna stängda. Håll handen stilla tills frasen sägs." },
-    Victory:{ name:"Två fingrar", def:"Jag behöver toaletten",
+    Victory:{ name:"Två fingrar", def:"Jag är törstig",
       how:"Gör ett peace-tecken: pekfinger och långfinger utsträckta i ett V, övriga fingrar stängda. Håll stilla." },
     Open_Palm:{ name:"Hela handen", def:"Hjälp",
       how:"Visa hela handen öppen mot kameran med alla fem fingrar särade, som en stopp-signal. Håll stilla." },
@@ -410,17 +412,31 @@ sv: {
       how:"Tummen upp, övriga fingrar stängda. Håll stilla." },
     Thumb_Down:{ name:"Tumme ner", def:"Nej tack",
       how:"Tummen ner, övriga fingrar stängda. Håll stilla." },
-    ILoveYou:{ name:"Jag älskar dig-tecknet", def:"Jag älskar dig",
+    ILoveYou:{ name:"Jag älskar dig-tecknet", def:"Du är bäst",
       how:"Sträck ut tumme, pekfinger och lillfinger samtidigt (🤟-tecknet), lång- och ringfinger stängda. Håll stilla." }
   }
 }};
+
+/* phrases whose DEFAULTS changed between versions: a stored text still equal
+   to an old default follows along to the new one; customised texts are kept */
+const OLD_DEFS = {
+  longBlink:["Thank you","Tack"],
+  mouthOpen:["I'm hungry","Jag är hungrig"],
+  ILoveYou:["I love you","Jag älskar dig"],
+  Pointing_Up:["I'm thirsty","Jag är törstig","I am hungry"],
+  Victory:["I need the toilet","Jag behöver toaletten","I am thirsty"],
+  Thumb_Up:["I feel good"],
+  Thumb_Down:["I feel bad","Jag mår dåligt"]
+};
 function T(){ return STR[cfg.lang] || STR.en; }
 
 /* ================= config ================= */
 const DEF_CFG = {
   lang:"en", texts:{}, enabled:{}, voiceURI:"", rate:0.95, voiceGender:"auto",
-  holdMs:700, yawThresh:0.22, pitchThresh:0.12, blinkMs:800, coolMs:3000, swapLR:false
+  holdMs:700, yawThresh:0.22, pitchThresh:0.18, blinkMs:800, coolMs:3000, swapLR:false
 };
+// NOTE: defsVer deliberately NOT in DEF_CFG - a fresh config must start
+// unversioned so the one-time default-migration in loadCfg can run
 GESTURES.forEach(g => { DEF_CFG.texts[g.id]=STR.en.g[g.id].def; DEF_CFG.enabled[g.id]=true; });
 let cfg = loadCfg();
 function loadCfg(){
@@ -429,10 +445,15 @@ function loadCfg(){
   catch(e){ c = JSON.parse(JSON.stringify(DEF_CFG)); }
   // a saved config from an older version lacks gestures added since -
   // give them their defaults instead of leaving them invisible
+  const lng=c.lang==="sv"?"sv":"en";
   for(const g of GESTURES){
     if(typeof c.enabled[g.id]==="undefined") c.enabled[g.id]=true;
-    if(typeof c.texts[g.id]==="undefined") c.texts[g.id]=STR[c.lang==="sv"?"sv":"en"].g[g.id].def;
+    if(typeof c.texts[g.id]==="undefined") c.texts[g.id]=STR[lng].g[g.id].def;
+    // defaults that changed between versions follow along (one-time)
+    if((c.defsVer||1)<2 && OLD_DEFS[g.id] && OLD_DEFS[g.id].includes(c.texts[g.id]))
+      c.texts[g.id]=STR[lng].g[g.id].def;
   }
+  c.defsVer=2;
   return c;
 }
 function saveCfg(){ localStorage.setItem("commcfg", JSON.stringify(cfg)); }
@@ -459,8 +480,9 @@ function applyLang(){
   const t=T();
   document.documentElement.lang=cfg.lang;
   $("hSub").textContent=t.sub;
-  $("flagEn").classList.toggle("active", cfg.lang==="en");
-  $("flagSv").classList.toggle("active", cfg.lang==="sv");
+  document.querySelectorAll(".flag-btn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.lang===cfg.lang && b.dataset.gender===cfg.voiceGender);
+  });
   $("secGestures").textContent=t.secGestures;
   $("secVoice").textContent=t.secVoice;
   $("secSens").textContent=t.secSens;
@@ -606,7 +628,7 @@ function engineFrame(signals, now){
       active = g.id==="headRight" ? yaw < -cfg.yawThresh : yaw > cfg.yawThresh;
       if(neutralNeed[g.id]){ if(Math.abs(signals.yaw)<cfg.yawThresh*0.5) neutralNeed[g.id]=false; else active=false; }
     } else if(g.type==="pitch"){
-      active = g.id==="headUp" ? signals.pitch < -cfg.pitchThresh : signals.pitch > cfg.pitchThresh;
+      active = g.id==="headUp" ? signals.pitch > cfg.pitchThresh : signals.pitch < -cfg.pitchThresh;
       if(neutralNeed[g.id]){ if(Math.abs(signals.pitch)<cfg.pitchThresh*0.5) neutralNeed[g.id]=false; else active=false; }
     } else if(g.type==="mouth"){
       active = signals.mouth > 0.5;
@@ -651,7 +673,8 @@ function updateChips(signals, now){
 /* ================= camera + mediapipe loop ================= */
 const video=$("video");
 let lastDetect=0;
-let pitchNeutral=0.52;   // adapts slowly to the person's natural posture
+let pitchNeutral=0;      // resting head-tilt angle, learned at startup
+let pitchBoot=75;        // ~5 s of fast calibration frames
 
 async function initVision(){
   const fileset=await FilesetResolver.forVisionTasks(
@@ -699,12 +722,16 @@ function loop(now){
       const dL=Math.hypot(nose.x-lc.x, nose.y-lc.y);
       const dR=Math.hypot(nose.x-rc.x, nose.y-rc.y);
       signals.yaw=(dL-dR)/Math.max(0.001,(dL+dR));
-      // pitch: nose position between the eye line and the chin (0 = at the
-      // eyes, 1 = at the chin) - drifts with real tilt, self-normalised
-      const eyeMidY=(lm[33].y+lm[263].y)/2, chinY=lm[152].y;
-      const rel=(nose.y-eyeMidY)/Math.max(0.001,(chinY-eyeMidY));
-      signals.pitch=rel-pitchNeutral;                 // - = up, + = down
-      if(Math.abs(rel-pitchNeutral)<0.08) pitchNeutral+=(rel-pitchNeutral)*0.03; // slow re-centre
+      // pitch: true 3D tilt - the chin->forehead vector leans towards the
+      // camera (z) when the head tilts. Angle in radians, + = up, - = down.
+      // Auto-calibrates to the person's resting posture the first seconds,
+      // then re-centres very slowly while near neutral.
+      const fh=lm[10], ch=lm[152];
+      const vx=fh.x-ch.x, vy=fh.y-ch.y, vz=fh.z-ch.z;
+      const ang=Math.atan2(vz, Math.hypot(vx,vy));
+      if(pitchBoot>0){ pitchNeutral+=(ang-pitchNeutral)*0.2; pitchBoot--; }
+      else if(Math.abs(ang-pitchNeutral)<cfg.pitchThresh*0.5) pitchNeutral+=(ang-pitchNeutral)*0.03;
+      signals.pitch=ang-pitchNeutral;
       if(f.faceBlendshapes && f.faceBlendshapes.length){
         const cats=f.faceBlendshapes[0].categories;
         const bl=getBlend(cats,"eyeBlinkLeft"), br=getBlend(cats,"eyeBlinkRight");
@@ -830,9 +857,14 @@ function bindGlobal(){
   $("swapLR").checked=cfg.swapLR;
   $("swapLR").onchange=e=>{ cfg.swapLR=e.target.checked; saveCfg(); };
   $("voiceSel").onchange=e=>{ cfg.voiceURI=e.target.value; saveCfg(); };
-  $("genderSel").onchange=e=>{ cfg.voiceGender=e.target.value; saveCfg(); pickVoice(true); };
-  $("flagEn").onclick=()=>switchLang("en");
-  $("flagSv").onclick=()=>switchLang("sv");
+  $("genderSel").onchange=e=>{ cfg.voiceGender=e.target.value; saveCfg(); pickVoice(true); applyLang(); };
+  document.querySelectorAll(".flag-btn").forEach(b=>{
+    b.onclick=()=>{
+      cfg.voiceGender=b.dataset.gender; saveCfg();
+      if(b.dataset.lang!==cfg.lang){ switchLang(b.dataset.lang); }
+      else { pickVoice(true); applyLang(); buildMainChips(); }
+    };
+  });
   $("exportBtn").onclick=()=>{
     const a=document.createElement("a");
     a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(cfg,null,2));
