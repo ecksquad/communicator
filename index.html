@@ -329,7 +329,7 @@ en: {
       how:"Turn your head clearly to the left, as if starting to look over your shoulder. Hold until the phrase is spoken, then turn back to the middle." },
     headUp:{ name:"Head up", def:"Hello",
       how:"Tilt your head back so you look up towards the ceiling. Hold until the phrase is spoken, then come back to the middle." },
-    headDown:{ name:"Head down", def:"I'm not good",
+    headDown:{ name:"Head down", def:"Goodbye",
       how:"Lower your chin towards your chest, as if looking down into your lap. Hold until the phrase is spoken, then come back up." },
     longBlink:{ name:"Long blink", def:"I love you",
       how:"Close both eyes and keep them closed for about a second. A normal quick blink never counts — it is the long closing that triggers the phrase." },
@@ -347,7 +347,7 @@ en: {
       how:"Close your hand into a fist and hold it towards the camera, still." },
     Thumb_Up:{ name:"Thumb up", def:"I'm good",
       how:"Thumb up, other fingers closed. Hold still." },
-    Thumb_Down:{ name:"Thumb down", def:"No thanks",
+    Thumb_Down:{ name:"Thumb down", def:"I'm not good",
       how:"Thumb down, other fingers closed. Hold still." },
     ILoveYou:{ name:"I-love-you sign", def:"You're the best",
       how:"Stretch out thumb, index finger and little finger at the same time (the 🤟 sign), middle and ring finger closed. Hold still." }
@@ -392,7 +392,7 @@ sv: {
       how:"Vrid huvudet tydligt åt vänster, som att du börjar titta över axeln. Håll kvar tills frasen sägs, och vrid sedan tillbaka mot mitten." },
     headUp:{ name:"Huvud uppåt", def:"Hej",
       how:"Luta huvudet bakåt så att du tittar upp mot taket. Håll kvar tills frasen sägs, och kom sedan tillbaka till mitten." },
-    headDown:{ name:"Huvud neråt", def:"Jag mår inte bra",
+    headDown:{ name:"Huvud neråt", def:"Hej då",
       how:"Sänk hakan mot bröstet, som att du tittar ner i knät. Håll kvar tills frasen sägs, och kom sedan upp igen." },
     longBlink:{ name:"Lång blinkning", def:"Jag älskar dig",
       how:"Blunda med båda ögonen och håll dem stängda i ungefär en sekund. En vanlig snabb blinkning räknas aldrig — det är den långa blundningen som utlöser frasen." },
@@ -410,23 +410,32 @@ sv: {
       how:"Knyt handen till en näve och håll den mot kameran, stilla." },
     Thumb_Up:{ name:"Tumme upp", def:"Jag mår bra",
       how:"Tummen upp, övriga fingrar stängda. Håll stilla." },
-    Thumb_Down:{ name:"Tumme ner", def:"Nej tack",
+    Thumb_Down:{ name:"Tumme ner", def:"Jag mår inte bra",
       how:"Tummen ner, övriga fingrar stängda. Håll stilla." },
     ILoveYou:{ name:"Jag älskar dig-tecknet", def:"Du är bäst",
       how:"Sträck ut tumme, pekfinger och lillfinger samtidigt (🤟-tecknet), lång- och ringfinger stängda. Håll stilla." }
   }
 }};
 
-/* phrases whose DEFAULTS changed between versions: a stored text still equal
-   to an old default follows along to the new one; customised texts are kept */
+/* EVERY default any version has ever shipped, per gesture, both languages.
+   A stored text still equal to any of these follows along to the current
+   default for the app's language; customised texts are kept. This is what
+   cleans up mixed-language leftovers from earlier versions. */
 const OLD_DEFS = {
-  longBlink:["Thank you","Tack"],
-  mouthOpen:["I'm hungry","Jag är hungrig"],
-  ILoveYou:["I love you","Jag älskar dig"],
-  Pointing_Up:["I'm thirsty","Jag är törstig","I am hungry"],
-  Victory:["I need the toilet","Jag behöver toaletten","I am thirsty"],
-  Thumb_Up:["I feel good"],
-  Thumb_Down:["I feel bad","Jag mår dåligt"]
+  headRight:["Ja","Yes"],
+  headLeft:["Nej","No"],
+  headUp:["Hello","Hej"],
+  headDown:["I'm not good","Jag mår inte bra","Goodbye","Hej då"],
+  longBlink:["Tack","Thank you","I love you","Jag älskar dig"],
+  browRaise:["Titta hit","Look here"],
+  mouthOpen:["I'm hungry","Jag är hungrig","Thank you","Tack"],
+  Pointing_Up:["Jag är hungrig","I am hungry","I'm thirsty","Jag är törstig","I'm hungry"],
+  Victory:["Jag är törstig","I am thirsty","I need the toilet","Jag behöver toaletten","I'm thirsty"],
+  Open_Palm:["Hjälp","Help"],
+  Closed_Fist:["Jag har ont","I am in pain","I'm in pain"],
+  Thumb_Up:["Jag mår bra","I feel good","I'm good"],
+  Thumb_Down:["Jag mår dåligt","I feel bad","No thanks","Nej tack","I'm not good","Jag mår inte bra"],
+  ILoveYou:["Jag älskar dig","I love you","You're the best","Du är bäst"]
 };
 function T(){ return STR[cfg.lang] || STR.en; }
 
@@ -450,10 +459,10 @@ function loadCfg(){
     if(typeof c.enabled[g.id]==="undefined") c.enabled[g.id]=true;
     if(typeof c.texts[g.id]==="undefined") c.texts[g.id]=STR[lng].g[g.id].def;
     // defaults that changed between versions follow along (one-time)
-    if((c.defsVer||1)<2 && OLD_DEFS[g.id] && OLD_DEFS[g.id].includes(c.texts[g.id]))
+    if((c.defsVer||1)<3 && OLD_DEFS[g.id] && OLD_DEFS[g.id].includes(c.texts[g.id]))
       c.texts[g.id]=STR[lng].g[g.id].def;
   }
-  c.defsVer=2;
+  c.defsVer=3;
   return c;
 }
 function saveCfg(){ localStorage.setItem("commcfg", JSON.stringify(cfg)); }
