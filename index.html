@@ -204,7 +204,7 @@
       <div id="log"></div>
       <div class="app-foot">
         <div id="deviceNote"></div>
-        <a id="donateLink" href="https://ecksquad.github.io/communicator2/" target="_blank" rel="noopener"></a>
+        <a id="donateLink" class="hidden" href="donate.html" target="_blank" rel="noopener"></a>
       </div>
     </div>
   </div>
@@ -312,6 +312,11 @@ import { FilesetResolver, FaceLandmarker, GestureRecognizer }
 
 "use strict";
 const $ = id => document.getElementById(id);
+
+// The ONLY line that differs between the two deployments:
+// ecksquad.github.io/communicator  -> false (clean, no donation anywhere)
+// ecksquad.github.io/communicator2 -> true  (footer link to donate.html)
+const SHOW_DONATE = false;
 
 /* ================= gestures (language-neutral) ================= */
 const GESTURES = [
@@ -838,6 +843,7 @@ function applyLang(){
     $("loading").innerHTML=t.loading;
   $("deviceNote").textContent=t.deviceNote;
   $("donateLink").textContent=t.donateMsg;
+  $("donateLink").classList.toggle("hidden", !SHOW_DONATE);
 }
 
 /* ================= recordings (IndexedDB) ================= */
