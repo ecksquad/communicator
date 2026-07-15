@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Kommunikatören</title>
+<style>
+  :root{
+    --bg:#0b1016; --panel:#141b23; --panel2:#0e151b; --ink:#f2f6f9; --muted:#8b99a6;
+    --line:#26333f; --accent:#37b6e0; --good:#35c37a; --warn:#f0a83f; --bad:#ef5350;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;height:100%}
+  body{display:flex;flex-direction:column}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex:none}
+  .h-title{font-size:20px;font-weight:800;letter-spacing:.04em}
+  .h-title small{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.18em}
+  .h-btns{display:flex;gap:8px}
+  .icon-btn{min-width:52px;height:52px;border-radius:12px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink);font-size:22px;cursor:pointer;padding:0 14px}
+  .icon-btn.active{background:var(--accent);color:#02202b;border-color:var(--accent)}
+  .icon-btn.stop{background:var(--bad);border-color:var(--bad);color:#fff}
+
+  main{flex:1;overflow-y:auto;padding:0 16px 24px}
+  .view{max-width:760px;margin:0 auto}
+
+  /* ---- main view ---- */
+  .stage{position:relative;border-radius:16px;overflow:hidden;background:#000;border:1px solid var(--line)}
+  video{width:100%;display:block;transform:scaleX(-1)}
+  #overlay{position:absolute;inset:0;pointer-events:none}
+  .status-pill{position:absolute;top:10px;left:10px;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
+    background:rgba(0,0,0,.55);color:var(--muted)}
+  .status-pill.on{color:var(--good)}
+  .yaw-meter{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:60%;height:8px;
+    background:rgba(255,255,255,.12);border-radius:4px}
+  .yaw-dot{position:absolute;top:-4px;width:16px;height:16px;border-radius:50%;background:var(--accent);
+    left:50%;transform:translateX(-50%)}
+
+  #spoken{min-height:130px;display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:clamp(30px,8vw,52px);font-weight:800;line-height:1.15;padding:18px 8px;
+    color:var(--good);text-wrap:balance}
+  #spoken.dim{color:#3a4a58;font-size:22px;font-weight:600}
+
+  .armed-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:10px}
+  .chip{font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--panel);
+    border:1px solid var(--line);color:var(--muted)}
+  .chip.hot{border-color:var(--good);color:var(--good)}
+  .chip .bar{display:inline-block;width:34px;height:5px;background:#2a3846;border-radius:3px;margin-left:7px;vertical-align:middle}
+  .chip .bar i{display:block;height:100%;width:0;background:var(--good);border-radius:3px}
+
+  #log{margin-top:14px;color:var(--muted);font-size:14px;line-height:1.9}
+  #log b{color:var(--ink)}
+
+  .bigbtn{width:100%;padding:18px;font-size:19px;font-weight:750;border:none;border-radius:14px;cursor:pointer;
+    background:var(--accent);color:#02202b;margin-top:12px}
+  .bigbtn.paused{background:var(--warn)}
+
+  /* ---- settings ---- */
+  h2{font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px}
+  .g-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+  .g-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .g-name{font-weight:750;font-size:16px;flex:1}
+  .g-icon{font-size:24px;width:36px;text-align:center}
+  .switch{position:relative;width:52px;height:30px;flex:none}
+  .switch input{opacity:0;width:0;height:0;position:absolute}
+  .switch .tr{position:absolute;inset:0;background:var(--line);border-radius:999px;transition:.2s;cursor:pointer}
+  .switch .tr::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;
+    background:#fff;transition:.2s}
+  .switch input:checked + .tr{background:var(--good)}
+  .switch input:checked + .tr::after{transform:translateX(22px)}
+  .g-row{display:flex;gap:8px}
+  .g-row input[type=text]{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    border-radius:10px;padding:12px;font-size:16px;min-width:0}
+  .sm-btn{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:10px;
+    padding:0 14px;font-size:16px;cursor:pointer;min-height:46px}
+  .sm-btn.rec{color:var(--bad)}
+  .sm-btn.rec.recording{background:var(--bad);color:#fff;animation:recblink 1s infinite}
+  @keyframes recblink{50%{opacity:.6}}
+  .g-voice{font-size:12.5px;color:var(--muted);margin-top:8px}
+  .g-voice b{color:var(--good)}
+
+  .set-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .set-row:last-child{border-bottom:none}
+  .set-row label{font-size:15px;font-weight:600}
+  .set-row .d{display:block;font-size:12.5px;color:var(--muted);font-weight:400;margin-top:2px;max-width:40ch}
+  .set-row select,.set-row input[type=range]{max-width:46%}
+  select{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px;font-size:15px}
+  input[type=range]{width:170px;accent-color:var(--accent)}
+  .val{font-size:13px;color:var(--muted);min-width:52px;text-align:right}
+
+  .footer-note{color:#5a6a78;font-size:12.5px;line-height:1.6;margin-top:22px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--panel);
+    border:1px solid var(--line);padding:12px 20px;border-radius:12px;font-size:15px;font-weight:600;
+    opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:92vw;text-align:center}
+  .toast.show{opacity:1}
+  .hidden{display:none !important}
+  #loading{padding:40px 10px;text-align:center;color:var(--muted);font-size:17px;line-height:1.7}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-title">KOMMUNIKATÖREN<small>RÖRELSER → RÖST</small></div>
+  <div class="h-btns">
+    <button class="icon-btn" id="viewBtn" title="Inställningar">⚙</button>
+  </div>
+</header>
+
+<main>
+  <!-- ================= MAIN VIEW ================= -->
+  <div class="view" id="mainView">
+    <div id="loading">Startar kameran och laddar igenkänningen …<br>
+      <span style="font-size:13px">(första gången tar det en stund — modellerna laddas ner)</span></div>
+    <div class="stage hidden" id="stage">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <div class="status-pill" id="statusPill">—</div>
+      <div class="yaw-meter"><div class="yaw-dot" id="yawDot"></div></div>
+    </div>
+    <div id="spoken" class="dim">Väntar på rörelse …</div>
+    <div class="armed-row" id="armedRow"></div>
+    <button class="bigbtn" id="pauseBtn">Pausa lyssning</button>
+    <div id="log"></div>
+  </div>
+
+  <!-- ================= SETTINGS VIEW ================= -->
+  <div class="view hidden" id="settingsView">
+    <h2>Rörelser och fraser</h2>
+    <div id="gestureList"></div>
+
+    <h2>Röst</h2>
+    <div class="g-card">
+      <div class="set-row">
+        <label>Röst<span class="d">Uppläsningsröst för fraser utan egen inspelning</span></label>
+        <select id="voiceSel"></select>
+      </div>
+      <div class="set-row">
+        <label>Hastighet</label>
+        <input type="range" id="rateRange" min="0.5" max="1.5" step="0.05">
+        <span class="val" id="rateVal"></span>
+      </div>
+    </div>
+
+    <h2>Känslighet</h2>
+    <div class="g-card">
+      <div class="set-row">
+        <label>Håll-tid<span class="d">Hur länge en rörelse måste hållas innan den räknas</span></label>
+        <input type="range" id="holdRange" min="300" max="2000" step="100">
+        <span class="val" id="holdVal"></span>
+      </div>
+      <div class="set-row">
+        <label>Huvudvridning<span class="d">Hur mycket huvudet måste vridas</span></label>
+        <input type="range" id="yawRange" min="0.10" max="0.45" step="0.01">
+        <span class="val" id="yawVal"></span>
+      </div>
+      <div class="set-row">
+        <label>Blink-tid<span class="d">Hur lång en avsiktlig blinkning är (naturliga är ~0,2 s)</span></label>
+        <input type="range" id="blinkRange" min="400" max="2000" step="100">
+        <span class="val" id="blinkVal"></span>
+      </div>
+      <div class="set-row">
+        <label>Vilotid<span class="d">Paus efter en fras innan nästa kan utlösas</span></label>
+        <input type="range" id="coolRange" min="1000" max="8000" step="500">
+        <span class="val" id="coolVal"></span>
+      </div>
+      <div class="set-row">
+        <label>Byt höger/vänster<span class="d">Om ja/nej känns spegelvända — slå på denna</span></label>
+        <label class="switch"><input type="checkbox" id="swapLR"><span class="tr"></span></label>
+      </div>
+    </div>
+
+    <h2>Säkerhetskopiering</h2>
+    <div class="g-card">
+      <div class="set-row">
+        <label>Exportera inställningar<span class="d">Sparar fraser och känslighet som fil (ej ljudinspelningar)</span></label>
+        <button class="sm-btn" id="exportBtn">Exportera</button>
+      </div>
+      <div class="set-row">
+        <label>Importera inställningar</label>
+        <button class="sm-btn" id="importBtn">Importera</button>
+        <input type="file" id="importFile" accept=".json" class="hidden">
+      </div>
+    </div>
+
+    <p class="footer-note">All igenkänning sker lokalt i webbläsaren — kamerabilden lämnar aldrig enheten.
+    "Egen röst": tryck 🎤 vid en fras och läs in den (med vilken röst som helst — t.ex. en anhörigs).
+    Inspelningen spelas då i stället för datorrösten. Inspelningar sparas lokalt på den här enheten.</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { FilesetResolver, FaceLandmarker, GestureRecognizer }
+  from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+"use strict";
+const $ = id => document.getElementById(id);
+
+/* ================= gestures ================= */
+const GESTURES = [
+  { id:"headRight",  icon:"👉", name:"Huvud åt höger",   def:"Ja",             type:"head" },
+  { id:"headLeft",   icon:"👈", name:"Huvud åt vänster", def:"Nej",            type:"head" },
+  { id:"longBlink",  icon:"😌", name:"Lång blinkning",   def:"Tack",           type:"blink" },
+  { id:"browRaise",  icon:"🤨", name:"Höjda ögonbryn",   def:"Titta hit",      type:"brow" },
+  { id:"Pointing_Up", icon:"☝️", name:"Ett finger",       def:"Jag är hungrig", type:"hand" },
+  { id:"Victory",    icon:"✌️", name:"Två fingrar",      def:"Jag är törstig", type:"hand" },
+  { id:"Open_Palm",  icon:"✋", name:"Hela handen",      def:"Hjälp",          type:"hand" },
+  { id:"Closed_Fist",icon:"✊", name:"Knuten hand",      def:"Jag har ont",    type:"hand" },
+  { id:"Thumb_Up",   icon:"👍", name:"Tumme upp",        def:"Jag mår bra",    type:"hand" },
+  { id:"Thumb_Down", icon:"👎", name:"Tumme ner",        def:"Jag mår dåligt", type:"hand" },
+  { id:"ILoveYou",   icon:"🤟", name:"Jag älskar dig-tecknet", def:"Jag älskar dig", type:"hand" }
+];
+
+/* ================= config ================= */
+const DEF_CFG = {
+  texts:{}, enabled:{}, voiceURI:"", rate:0.95,
+  holdMs:700, yawThresh:0.22, blinkMs:800, coolMs:3000, swapLR:false
+};
+GESTURES.forEach(g => { DEF_CFG.texts[g.id]=g.def; DEF_CFG.enabled[g.id]=true; });
+let cfg = loadCfg();
+function loadCfg(){
+  try { return Object.assign(JSON.parse(JSON.stringify(DEF_CFG)), JSON.parse(localStorage.getItem("commcfg")||"{}")); }
+  catch(e){ return JSON.parse(JSON.stringify(DEF_CFG)); }
+}
+function saveCfg(){ localStorage.setItem("commcfg", JSON.stringify(cfg)); }
+
+/* ================= recordings (IndexedDB) ================= */
+const idb = {
+  db:null,
+  open(){ return new Promise((res)=>{ const r=indexedDB.open("commrec",1);
+    r.onupgradeneeded=()=>r.result.createObjectStore("rec");
+    r.onsuccess=()=>{ idb.db=r.result; res(); }; r.onerror=()=>res(); }); },
+  put(k,blob){ return new Promise((res)=>{ if(!idb.db)return res();
+    const t=idb.db.transaction("rec","readwrite"); t.objectStore("rec").put(blob,k);
+    t.oncomplete=res; t.onerror=res; }); },
+  get(k){ return new Promise((res)=>{ if(!idb.db)return res(null);
+    const q=idb.db.transaction("rec").objectStore("rec").get(k);
+    q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null); }); },
+  del(k){ return new Promise((res)=>{ if(!idb.db)return res();
+    const t=idb.db.transaction("rec","readwrite"); t.objectStore("rec").delete(k);
+    t.oncomplete=res; t.onerror=res; }); }
+};
+
+/* ================= speech ================= */
+let voices=[];
+function refreshVoices(){
+  voices = speechSynthesis.getVoices();
+  const sel=$("voiceSel"); sel.innerHTML="";
+  const sorted=[...voices].sort((a,b)=>{
+    const sw=v=>v.lang.startsWith("sv")?0:(v.lang.startsWith("en")?1:2);
+    return sw(a)-sw(b) || a.name.localeCompare(b.name);
+  });
+  for(const v of sorted){
+    const o=document.createElement("option");
+    o.value=v.voiceURI; o.textContent=v.name+" ("+v.lang+")";
+    sel.appendChild(o);
+  }
+  if(cfg.voiceURI) sel.value=cfg.voiceURI;
+  else { const sv=sorted.find(v=>v.lang.startsWith("sv")); if(sv){ sel.value=sv.voiceURI; cfg.voiceURI=sv.voiceURI; } }
+}
+speechSynthesis.onvoiceschanged=refreshVoices;
+
+async function speak(gid){
+  const text=cfg.texts[gid]||"";
+  const rec=await idb.get(gid);
+  showSpoken(text);
+  if(rec){
+    const url=URL.createObjectURL(rec);
+    const a=new Audio(url); a.play(); a.onended=()=>URL.revokeObjectURL(url);
+    return;
+  }
+  if(!text) return;
+  const u=new SpeechSynthesisUtterance(text);
+  const v=voices.find(v=>v.voiceURI===cfg.voiceURI); if(v)u.voice=v;
+  u.rate=cfg.rate;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+function showSpoken(text){
+  const el=$("spoken"); el.classList.remove("dim"); el.textContent=text;
+  clearTimeout(showSpoken.t);
+  showSpoken.t=setTimeout(()=>{ el.classList.add("dim"); el.textContent="Väntar på rörelse …"; }, 6000);
+  const log=$("log");
+  const time=new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+  log.innerHTML=("<div>"+time+" — <b>"+text+"</b></div>")+log.innerHTML;
+  while(log.children.length>6) log.removeChild(log.lastChild);
+}
+
+/* ================= detection engine ================= */
+let faceLM=null, gestureRec=null, running=false, paused=false;
+let lastFire=0;
+const armState={};   // id -> {since:ts} while condition currently true
+const neutralNeed={};// id -> true when must return to neutral first
+
+function resetArm(id){ delete armState[id]; }
+
+function engineFrame(signals, now){
+  if(paused) return;
+  if(now-lastFire < cfg.coolMs){ Object.keys(armState).forEach(resetArm); updateChips(signals,now); return; }
+
+  for(const g of GESTURES){
+    if(!cfg.enabled[g.id]) continue;
+    let active=false, holdNeeded=cfg.holdMs;
+    if(g.type==="head"){
+      const yaw=cfg.swapLR ? -signals.yaw : signals.yaw;
+      active = g.id==="headRight" ? yaw < -cfg.yawThresh : yaw > cfg.yawThresh;
+      if(neutralNeed[g.id]){ if(Math.abs(signals.yaw)<cfg.yawThresh*0.5) neutralNeed[g.id]=false; else active=false; }
+    } else if(g.type==="blink"){
+      active = signals.blink;
+      holdNeeded = cfg.blinkMs;
+      if(neutralNeed[g.id]){ if(!signals.blink) neutralNeed[g.id]=false; active=false; }
+    } else if(g.type==="brow"){
+      active = signals.brow > 0.55;
+      if(neutralNeed[g.id]){ if(signals.brow<0.3) neutralNeed[g.id]=false; active=false; }
+    } else if(g.type==="hand"){
+      active = signals.hand===g.id && signals.handScore>0.55;
+      holdNeeded = Math.max(cfg.holdMs, 800);
+    }
+
+    if(active){
+      if(!armState[g.id]) armState[g.id]={since:now};
+      else if(now-armState[g.id].since >= holdNeeded){
+        resetArm(g.id);
+        neutralNeed[g.id]=true;
+        lastFire=now;
+        speak(g.id);
+        return;
+      }
+    } else resetArm(g.id);
+  }
+  updateChips(signals, now);
+}
+
+function updateChips(signals, now){
+  for(const g of GESTURES){
+    const chip=chipEls[g.id]; if(!chip) continue;
+    const st=armState[g.id];
+    const need=(g.type==="blink")?cfg.blinkMs:(g.type==="hand"?Math.max(cfg.holdMs,800):cfg.holdMs);
+    const p=st?Math.min(1,(now-st.since)/need):0;
+    chip.classList.toggle("hot", p>0);
+    chip.querySelector("i").style.width=(p*100)+"%";
+  }
+}
+
+/* ================= camera + mediapipe loop ================= */
+const video=$("video");
+let lastDetect=0;
+
+async function initVision(){
+  const fileset=await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+  const FACE_MODEL="https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
+  const HAND_MODEL="https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task";
+  // GPU delegate is fastest but not available everywhere - fall back to CPU
+  async function make(cls, opts){
+    try { return await cls.createFromOptions(fileset, { ...opts, baseOptions:{ ...opts.baseOptions, delegate:"GPU" } }); }
+    catch(e){ return await cls.createFromOptions(fileset, { ...opts, baseOptions:{ ...opts.baseOptions, delegate:"CPU" } }); }
+  }
+  faceLM=await make(FaceLandmarker,{
+    baseOptions:{ modelAssetPath:FACE_MODEL },
+    outputFaceBlendshapes:true, runningMode:"VIDEO", numFaces:1
+  });
+  gestureRec=await make(GestureRecognizer,{
+    baseOptions:{ modelAssetPath:HAND_MODEL },
+    runningMode:"VIDEO", numHands:1
+  });
+}
+
+async function initCamera(){
+  const stream=await navigator.mediaDevices.getUserMedia({
+    video:{ facingMode:"user", width:{ideal:640}, height:{ideal:480} }, audio:false });
+  video.srcObject=stream;
+  await new Promise(r=>video.onloadedmetadata=r);
+}
+
+function getBlend(cats,name){
+  const c=cats.find(x=>x.categoryName===name); return c?c.score:0;
+}
+
+function loop(now){
+  requestAnimationFrame(loop);
+  if(!running || video.readyState<2) return;
+  if(now-lastDetect < 66) return;   // ~15 fps detection - kind to phone batteries
+  lastDetect=now;
+
+  const signals={ yaw:0, blink:false, brow:0, hand:null, handScore:0, face:false };
+  try{
+    const f=faceLM.detectForVideo(video, now);
+    if(f.faceLandmarks && f.faceLandmarks.length){
+      signals.face=true;
+      const lm=f.faceLandmarks[0];
+      // yaw from nose (1) vs cheeks (234 left / 454 right in image coords)
+      const nose=lm[1], lc=lm[234], rc=lm[454];
+      const dL=Math.hypot(nose.x-lc.x, nose.y-lc.y);
+      const dR=Math.hypot(nose.x-rc.x, nose.y-rc.y);
+      signals.yaw=(dL-dR)/Math.max(0.001,(dL+dR)); // + = nose closer to right cheek (image)
+      if(f.faceBlendshapes && f.faceBlendshapes.length){
+        const cats=f.faceBlendshapes[0].categories;
+        const bl=getBlend(cats,"eyeBlinkLeft"), br=getBlend(cats,"eyeBlinkRight");
+        signals.blink=(bl>0.5 && br>0.5);
+        signals.brow=getBlend(cats,"browInnerUp");
+      }
+    }
+    const g=gestureRec.recognizeForVideo(video, now);
+    if(g.gestures && g.gestures.length && g.gestures[0].length){
+      const top=g.gestures[0][0];
+      if(top.categoryName!=="None"){ signals.hand=top.categoryName; signals.handScore=top.score; }
+    }
+  }catch(e){ /* one bad frame is fine */ }
+
+  $("statusPill").textContent=signals.face?"Ser dig ✓":"Letar efter ansikte …";
+  $("statusPill").classList.toggle("on", signals.face);
+  const dot=$("yawDot");
+  dot.style.left=(50 - Math.max(-1,Math.min(1,signals.yaw/0.45))*40)+"%";
+
+  engineFrame(signals, now);
+}
+
+/* ================= settings UI ================= */
+const chipEls={};
+function buildMainChips(){
+  const row=$("armedRow"); row.innerHTML="";
+  for(const g of GESTURES){
+    if(!cfg.enabled[g.id]) continue;
+    const c=document.createElement("span");
+    c.className="chip"; c.innerHTML=g.icon+" "+(cfg.texts[g.id]||g.name)+'<span class="bar"><i></i></span>';
+    row.appendChild(c); chipEls[g.id]=c;
+  }
+}
+
+let mediaRecorder=null, recChunks=[], recId=null;
+async function toggleRecord(gid, btn){
+  if(mediaRecorder && mediaRecorder.state==="recording"){
+    mediaRecorder.stop(); return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    recChunks=[]; recId=gid;
+    mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=e=>recChunks.push(e.data);
+    mediaRecorder.onstop=async ()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      const blob=new Blob(recChunks,{type:mediaRecorder.mimeType||"audio/webm"});
+      await idb.put(recId, blob);
+      btn.classList.remove("recording");
+      toast("Inspelning sparad — den används nu i stället för datorrösten");
+      buildSettings();
+    };
+    mediaRecorder.start();
+    btn.classList.add("recording");
+    toast("Spelar in … tryck 🎤 igen för att stoppa");
+  }catch(e){ toast("Kunde inte starta mikrofonen"); }
+}
+
+async function buildSettings(){
+  const list=$("gestureList"); list.innerHTML="";
+  for(const g of GESTURES){
+    const card=document.createElement("div"); card.className="g-card";
+    const hasRec=!!(await idb.get(g.id));
+    card.innerHTML=
+      '<div class="g-top"><span class="g-icon">'+g.icon+'</span>'+
+      '<span class="g-name">'+g.name+'</span>'+
+      '<label class="switch"><input type="checkbox" data-en="'+g.id+'" '+(cfg.enabled[g.id]?"checked":"")+'><span class="tr"></span></label></div>'+
+      '<div class="g-row">'+
+      '<input type="text" data-txt="'+g.id+'" value="'+(cfg.texts[g.id]||"").replace(/"/g,"&quot;")+'" placeholder="Skriv frasen som ska sägas">'+
+      '<button class="sm-btn" data-test="'+g.id+'" title="Provlyssna">▶</button>'+
+      '<button class="sm-btn rec" data-rec="'+g.id+'" title="Spela in egen röst">🎤</button>'+
+      (hasRec?'<button class="sm-btn" data-clr="'+g.id+'" title="Ta bort inspelning">✕</button>':"")+
+      '</div>'+
+      (hasRec?'<div class="g-voice">Egen inspelning finns — <b>den spelas i stället för datorrösten</b></div>':"");
+    list.appendChild(card);
+  }
+  list.querySelectorAll("[data-en]").forEach(el=>el.onchange=()=>{ cfg.enabled[el.dataset.en]=el.checked; saveCfg(); buildMainChips(); });
+  list.querySelectorAll("[data-txt]").forEach(el=>el.onchange=()=>{ cfg.texts[el.dataset.txt]=el.value.trim(); saveCfg(); buildMainChips(); });
+  list.querySelectorAll("[data-test]").forEach(el=>el.onclick=()=>speak(el.dataset.test));
+  list.querySelectorAll("[data-rec]").forEach(el=>el.onclick=()=>toggleRecord(el.dataset.rec, el));
+  list.querySelectorAll("[data-clr]").forEach(el=>el.onclick=async ()=>{ await idb.del(el.dataset.clr); toast("Inspelning borttagen"); buildSettings(); });
+}
+
+function bindGlobal(){
+  const pairs=[["rateRange","rate",v=>v+"×"],["holdRange","holdMs",v=>v+" ms"],
+    ["yawRange","yawThresh",v=>v],["blinkRange","blinkMs",v=>v+" ms"],["coolRange","coolMs",v=>(v/1000)+" s"]];
+  for(const [rid,key,fmt] of pairs){
+    const r=$(rid), val=$(rid.replace("Range","Val"));
+    r.value=cfg[key]; val.textContent=fmt(cfg[key]);
+    r.oninput=()=>{ cfg[key]=parseFloat(r.value); val.textContent=fmt(r.value); saveCfg(); };
+  }
+  $("swapLR").checked=cfg.swapLR;
+  $("swapLR").onchange=e=>{ cfg.swapLR=e.target.checked; saveCfg(); };
+  $("voiceSel").onchange=e=>{ cfg.voiceURI=e.target.value; saveCfg(); };
+  $("exportBtn").onclick=()=>{
+    const a=document.createElement("a");
+    a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(cfg,null,2));
+    a.download="kommunikatoren-installningar.json"; a.click();
+  };
+  $("importBtn").onclick=()=>$("importFile").click();
+  $("importFile").onchange=e=>{
+    const f=e.target.files[0]; if(!f)return;
+    const rd=new FileReader();
+    rd.onload=()=>{ try{ cfg=Object.assign(JSON.parse(JSON.stringify(DEF_CFG)), JSON.parse(rd.result));
+      saveCfg(); bindGlobal(); buildSettings(); buildMainChips(); toast("Inställningar importerade"); }
+      catch(err){ toast("Kunde inte läsa filen"); } };
+    rd.readAsText(f);
+  };
+}
+
+/* ================= view switching & misc ================= */
+$("viewBtn").onclick=()=>{
+  const s=$("settingsView").classList.toggle("hidden");
+  $("mainView").classList.toggle("hidden", !s);
+  $("viewBtn").classList.toggle("active", !s);
+  if(!s) buildSettings();
+};
+$("pauseBtn").onclick=()=>{
+  paused=!paused;
+  $("pauseBtn").textContent=paused?"Fortsätt lyssna":"Pausa lyssning";
+  $("pauseBtn").classList.toggle("paused",paused);
+};
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("show"),3200);
+}
+
+/* ================= boot ================= */
+(async function(){
+  await idb.open();
+  refreshVoices();
+  bindGlobal();
+  buildMainChips();
+  try{
+    await Promise.all([initVision(), initCamera()]);
+    $("loading").classList.add("hidden");
+    $("stage").classList.remove("hidden");
+    running=true;
+    requestAnimationFrame(loop);
+  }catch(e){
+    $("loading").innerHTML="Kunde inte starta: "+e.message+
+      "<br><span style='font-size:13px'>Kontrollera att sidan får använda kameran (hänglåset i adressfältet).</span>";
+  }
+})();
+</script>
+</body>
+</html>
