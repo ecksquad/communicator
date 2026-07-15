@@ -424,8 +424,16 @@ const DEF_CFG = {
 GESTURES.forEach(g => { DEF_CFG.texts[g.id]=STR.en.g[g.id].def; DEF_CFG.enabled[g.id]=true; });
 let cfg = loadCfg();
 function loadCfg(){
-  try { return Object.assign(JSON.parse(JSON.stringify(DEF_CFG)), JSON.parse(localStorage.getItem("commcfg")||"{}")); }
-  catch(e){ return JSON.parse(JSON.stringify(DEF_CFG)); }
+  let c;
+  try { c = Object.assign(JSON.parse(JSON.stringify(DEF_CFG)), JSON.parse(localStorage.getItem("commcfg")||"{}")); }
+  catch(e){ c = JSON.parse(JSON.stringify(DEF_CFG)); }
+  // a saved config from an older version lacks gestures added since -
+  // give them their defaults instead of leaving them invisible
+  for(const g of GESTURES){
+    if(typeof c.enabled[g.id]==="undefined") c.enabled[g.id]=true;
+    if(typeof c.texts[g.id]==="undefined") c.texts[g.id]=STR[c.lang==="sv"?"sv":"en"].g[g.id].def;
+  }
+  return c;
 }
 function saveCfg(){ localStorage.setItem("commcfg", JSON.stringify(cfg)); }
 
