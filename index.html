@@ -29,6 +29,11 @@
   main{flex:1;overflow-y:auto;padding:0 18px 28px}
   .view{max-width:1060px;margin:0 auto}
 
+  .flag-row{display:flex;gap:10px;justify-content:center;margin-bottom:6px}
+  .flag-btn{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;
+    padding:9px 18px;font-size:15px;font-weight:700;cursor:pointer}
+  .flag-btn.active{border-color:var(--accent);color:var(--ink);background:rgba(55,182,224,.12)}
+
   /* ---- main view ---- */
   #spoken{min-height:110px;display:flex;align-items:center;justify-content:center;text-align:center;
     font-size:clamp(30px,6vw,58px);font-weight:800;line-height:1.12;padding:14px 8px;
@@ -143,6 +148,10 @@
 <main>
   <!-- ================= MAIN VIEW ================= -->
   <div class="view" id="mainView">
+    <div class="flag-row">
+      <button class="flag-btn" id="flagEn" data-lang="en">🇬🇧 English</button>
+      <button class="flag-btn" id="flagSv" data-lang="sv">🇸🇪 Svenska</button>
+    </div>
     <div id="loading">Starting the camera and loading recognition …<br>
       <span style="font-size:13px">(the first time takes a while — the models are downloading)</span></div>
     <div id="spoken" class="dim hidden"></div>
@@ -164,17 +173,6 @@
 
   <!-- ================= SETTINGS VIEW ================= -->
   <div class="view hidden" id="settingsView">
-    <h2 id="secLang">Language</h2>
-    <div class="g-card">
-      <div class="set-row">
-        <label id="langLbl">App language<span class="d" id="langDesc"></span></label>
-        <select id="langSel">
-          <option value="en">English</option>
-          <option value="sv">Svenska</option>
-        </select>
-      </div>
-    </div>
-
     <h2 id="secGestures"></h2>
     <div id="gestureList"></div>
 
@@ -183,6 +181,14 @@
       <div class="set-row">
         <label id="voiceLbl"><span class="d" id="voiceDesc"></span></label>
         <select id="voiceSel"></select>
+      </div>
+      <div class="set-row">
+        <label id="genderLbl"></label>
+        <select id="genderSel">
+          <option value="auto"></option>
+          <option value="female"></option>
+          <option value="male"></option>
+        </select>
       </div>
       <div class="set-row">
         <label id="rateLbl"></label>
@@ -203,6 +209,11 @@
         <label id="yawLbl"><span class="d" id="yawDesc"></span></label>
         <input type="range" id="yawRange" min="0.10" max="0.45" step="0.01">
         <span class="val" id="yawVal"></span>
+      </div>
+      <div class="set-row">
+        <label id="pitchLbl"><span class="d" id="pitchDesc"></span></label>
+        <input type="range" id="pitchRange" min="0.06" max="0.25" step="0.01">
+        <span class="val" id="pitchVal"></span>
       </div>
       <div class="set-row">
         <label id="blinkLbl"><span class="d" id="blinkDesc"></span></label>
@@ -261,8 +272,11 @@ const $ = id => document.getElementById(id);
 const GESTURES = [
   { id:"headRight",   icon:"👉", type:"head"  },
   { id:"headLeft",    icon:"👈", type:"head"  },
+  { id:"headUp",      icon:"⬆️", type:"pitch" },
+  { id:"headDown",    icon:"⬇️", type:"pitch" },
   { id:"longBlink",   icon:"😌", type:"blink" },
   { id:"browRaise",   icon:"🤨", type:"brow"  },
+  { id:"mouthOpen",   icon:"😮", type:"mouth" },
   { id:"Pointing_Up", icon:"☝️", type:"hand"  },
   { id:"Victory",     icon:"✌️", type:"hand"  },
   { id:"Open_Palm",   icon:"✋", type:"hand"  },
@@ -284,8 +298,10 @@ en: {
   langLbl:"App language", langDesc:"Interface, phrases and speaking voice",
   voiceLbl:"Voice", voiceDesc:"Speaking voice for phrases without a recording",
   rateLbl:"Speed",
+  genderLbl:"Voice type", gAuto:"Best available", gFemale:"Female", gMale:"Male",
   holdLbl:"Hold time", holdDesc:"How long a movement must be held before it counts",
-  yawLbl:"Head turn", yawDesc:"How far the head must be turned",
+  yawLbl:"Head turn", yawDesc:"How far the head must be turned sideways",
+  pitchLbl:"Head nod", pitchDesc:"How far the head must tilt up or down",
   blinkLbl:"Blink length", blinkDesc:"How long a deliberate blink is (natural blinks are ~0.2 s)",
   coolLbl:"Rest time", coolDesc:"Pause after a phrase before the next can trigger",
   swapLbl:"Swap left/right", swapDesc:"If yes/no feel mirrored — turn this on",
@@ -309,21 +325,27 @@ en: {
       how:"Turn your head clearly to the right, as if starting to look over your shoulder. Hold until the phrase is spoken (about a second), then turn back to the middle. The next turn only counts after your head has returned to the middle." },
     headLeft:{ name:"Head to the left", def:"No",
       how:"Turn your head clearly to the left, as if starting to look over your shoulder. Hold until the phrase is spoken, then turn back to the middle." },
+    headUp:{ name:"Head up", def:"Hello",
+      how:"Tilt your head back so you look up towards the ceiling. Hold until the phrase is spoken, then come back to the middle." },
+    headDown:{ name:"Head down", def:"I'm not good",
+      how:"Lower your chin towards your chest, as if looking down into your lap. Hold until the phrase is spoken, then come back up." },
     longBlink:{ name:"Long blink", def:"Thank you",
       how:"Close both eyes and keep them closed for about a second. A normal quick blink never counts — it is the long closing that triggers the phrase." },
     browRaise:{ name:"Raised eyebrows", def:"Look here",
       how:"Raise your eyebrows properly, like a surprised face, and hold until the phrase is spoken." },
-    Pointing_Up:{ name:"One finger", def:"I am hungry",
+    mouthOpen:{ name:"Open mouth", def:"I'm hungry",
+      how:"Open your mouth wide, as for a big bite, and hold it open until the phrase is spoken." },
+    Pointing_Up:{ name:"One finger", def:"I'm thirsty",
       how:"Hold up ONE index finger straight up towards the camera, other fingers closed. Keep the hand still until the phrase is spoken." },
-    Victory:{ name:"Two fingers", def:"I am thirsty",
+    Victory:{ name:"Two fingers", def:"I need the toilet",
       how:"Make a peace sign: index and middle finger stretched out in a V, other fingers closed. Hold still." },
     Open_Palm:{ name:"Whole hand", def:"Help",
       how:"Show your whole open hand towards the camera with all five fingers spread, like a stop signal. Hold still." },
-    Closed_Fist:{ name:"Closed fist", def:"I am in pain",
+    Closed_Fist:{ name:"Closed fist", def:"I'm in pain",
       how:"Close your hand into a fist and hold it towards the camera, still." },
-    Thumb_Up:{ name:"Thumb up", def:"I feel good",
+    Thumb_Up:{ name:"Thumb up", def:"I'm good",
       how:"Thumb up, other fingers closed. Hold still." },
-    Thumb_Down:{ name:"Thumb down", def:"I feel bad",
+    Thumb_Down:{ name:"Thumb down", def:"No thanks",
       how:"Thumb down, other fingers closed. Hold still." },
     ILoveYou:{ name:"I-love-you sign", def:"I love you",
       how:"Stretch out thumb, index finger and little finger at the same time (the 🤟 sign), middle and ring finger closed. Hold still." }
@@ -339,8 +361,10 @@ sv: {
   langLbl:"Appens språk", langDesc:"Gränssnitt, fraser och uppläsningsröst",
   voiceLbl:"Röst", voiceDesc:"Uppläsningsröst för fraser utan egen inspelning",
   rateLbl:"Hastighet",
+  genderLbl:"Rösttyp", gAuto:"Bästa tillgängliga", gFemale:"Kvinna", gMale:"Man",
   holdLbl:"Håll-tid", holdDesc:"Hur länge en rörelse måste hållas innan den räknas",
-  yawLbl:"Huvudvridning", yawDesc:"Hur mycket huvudet måste vridas",
+  yawLbl:"Huvudvridning", yawDesc:"Hur mycket huvudet måste vridas åt sidan",
+  pitchLbl:"Huvudnick", pitchDesc:"Hur mycket huvudet måste lutas upp eller ner",
   blinkLbl:"Blink-tid", blinkDesc:"Hur lång en avsiktlig blinkning är (naturliga är ~0,2 s)",
   coolLbl:"Vilotid", coolDesc:"Paus efter en fras innan nästa kan utlösas",
   swapLbl:"Byt höger/vänster", swapDesc:"Om ja/nej känns spegelvända — slå på denna",
@@ -364,13 +388,19 @@ sv: {
       how:"Vrid huvudet tydligt åt höger, som att du börjar titta över axeln. Håll kvar tills frasen sägs (ungefär en sekund), och vrid sedan tillbaka mot mitten. Nästa vridning räknas först när huvudet varit tillbaka i mitten." },
     headLeft:{ name:"Huvud åt vänster", def:"Nej",
       how:"Vrid huvudet tydligt åt vänster, som att du börjar titta över axeln. Håll kvar tills frasen sägs, och vrid sedan tillbaka mot mitten." },
+    headUp:{ name:"Huvud uppåt", def:"Hej",
+      how:"Luta huvudet bakåt så att du tittar upp mot taket. Håll kvar tills frasen sägs, och kom sedan tillbaka till mitten." },
+    headDown:{ name:"Huvud neråt", def:"Jag mår inte bra",
+      how:"Sänk hakan mot bröstet, som att du tittar ner i knät. Håll kvar tills frasen sägs, och kom sedan upp igen." },
     longBlink:{ name:"Lång blinkning", def:"Tack",
       how:"Blunda med båda ögonen och håll dem stängda i ungefär en sekund. En vanlig snabb blinkning räknas aldrig — det är den långa blundningen som utlöser frasen." },
     browRaise:{ name:"Höjda ögonbryn", def:"Titta hit",
       how:"Höj ögonbrynen ordentligt, som en förvånad min, och håll kvar tills frasen sägs." },
-    Pointing_Up:{ name:"Ett finger", def:"Jag är hungrig",
+    mouthOpen:{ name:"Öppen mun", def:"Jag är hungrig",
+      how:"Gapa stort, som för en stor tugga, och håll munnen öppen tills frasen sägs." },
+    Pointing_Up:{ name:"Ett finger", def:"Jag är törstig",
       how:"Håll upp ETT pekfinger rakt upp mot kameran, med de andra fingrarna stängda. Håll handen stilla tills frasen sägs." },
-    Victory:{ name:"Två fingrar", def:"Jag är törstig",
+    Victory:{ name:"Två fingrar", def:"Jag behöver toaletten",
       how:"Gör ett peace-tecken: pekfinger och långfinger utsträckta i ett V, övriga fingrar stängda. Håll stilla." },
     Open_Palm:{ name:"Hela handen", def:"Hjälp",
       how:"Visa hela handen öppen mot kameran med alla fem fingrar särade, som en stopp-signal. Håll stilla." },
@@ -378,7 +408,7 @@ sv: {
       how:"Knyt handen till en näve och håll den mot kameran, stilla." },
     Thumb_Up:{ name:"Tumme upp", def:"Jag mår bra",
       how:"Tummen upp, övriga fingrar stängda. Håll stilla." },
-    Thumb_Down:{ name:"Tumme ner", def:"Jag mår dåligt",
+    Thumb_Down:{ name:"Tumme ner", def:"Nej tack",
       how:"Tummen ner, övriga fingrar stängda. Håll stilla." },
     ILoveYou:{ name:"Jag älskar dig-tecknet", def:"Jag älskar dig",
       how:"Sträck ut tumme, pekfinger och lillfinger samtidigt (🤟-tecknet), lång- och ringfinger stängda. Håll stilla." }
@@ -388,8 +418,8 @@ function T(){ return STR[cfg.lang] || STR.en; }
 
 /* ================= config ================= */
 const DEF_CFG = {
-  lang:"en", texts:{}, enabled:{}, voiceURI:"", rate:0.95,
-  holdMs:700, yawThresh:0.22, blinkMs:800, coolMs:3000, swapLR:false
+  lang:"en", texts:{}, enabled:{}, voiceURI:"", rate:0.95, voiceGender:"auto",
+  holdMs:700, yawThresh:0.22, pitchThresh:0.12, blinkMs:800, coolMs:3000, swapLR:false
 };
 GESTURES.forEach(g => { DEF_CFG.texts[g.id]=STR.en.g[g.id].def; DEF_CFG.enabled[g.id]=true; });
 let cfg = loadCfg();
@@ -402,6 +432,7 @@ function saveCfg(){ localStorage.setItem("commcfg", JSON.stringify(cfg)); }
 /* switching language: phrases still at the old default follow along,
    customised phrases are kept */
 function switchLang(newLang){
+  if(newLang===cfg.lang) return;
   const old=cfg.lang;
   for(const g of GESTURES){
     if(cfg.texts[g.id]===STR[old].g[g.id].def) cfg.texts[g.id]=STR[newLang].g[g.id].def;
@@ -420,9 +451,8 @@ function applyLang(){
   const t=T();
   document.documentElement.lang=cfg.lang;
   $("hSub").textContent=t.sub;
-  $("secLang").textContent=t.secLang;
-  $("langLbl").childNodes[0].textContent=t.langLbl;
-  $("langDesc").textContent=t.langDesc;
+  $("flagEn").classList.toggle("active", cfg.lang==="en");
+  $("flagSv").classList.toggle("active", cfg.lang==="sv");
   $("secGestures").textContent=t.secGestures;
   $("secVoice").textContent=t.secVoice;
   $("secSens").textContent=t.secSens;
@@ -430,8 +460,13 @@ function applyLang(){
   $("voiceLbl").childNodes[0].textContent=t.voiceLbl;
   $("voiceDesc").textContent=t.voiceDesc;
   $("rateLbl").textContent=t.rateLbl;
+  $("genderLbl").textContent=t.genderLbl;
+  const gs=$("genderSel");
+  gs.options[0].textContent=t.gAuto; gs.options[1].textContent=t.gFemale; gs.options[2].textContent=t.gMale;
+  gs.value=cfg.voiceGender;
   $("holdLbl").childNodes[0].textContent=t.holdLbl; $("holdDesc").textContent=t.holdDesc;
   $("yawLbl").childNodes[0].textContent=t.yawLbl;   $("yawDesc").textContent=t.yawDesc;
+  $("pitchLbl").childNodes[0].textContent=t.pitchLbl; $("pitchDesc").textContent=t.pitchDesc;
   $("blinkLbl").childNodes[0].textContent=t.blinkLbl; $("blinkDesc").textContent=t.blinkDesc;
   $("coolLbl").childNodes[0].textContent=t.coolLbl; $("coolDesc").textContent=t.coolDesc;
   $("swapLbl").childNodes[0].textContent=t.swapLbl; $("swapDesc").textContent=t.swapDesc;
@@ -445,7 +480,6 @@ function applyLang(){
   if($("spoken").classList.contains("dim")) $("spoken").textContent=t.waiting;
   if($("loading") && !$("loading").classList.contains("hidden") && !$("loading").dataset.failed)
     $("loading").innerHTML=t.loading;
-  $("langSel").value=cfg.lang;
 }
 
 /* ================= recordings (IndexedDB) ================= */
@@ -467,6 +501,13 @@ const idb = {
 
 /* ================= speech ================= */
 let voices=[];
+const FEMALE_NAMES=/sofie|hillevi|female|zira|jenny|aria|libby|sonia|emma|michelle|ana\b|clara|hazel|susan|karen|serena|alva|elin|natasha|salli|astrid|amy|joanna|kendra|kimberly|catherine/i;
+const MALE_NAMES=/mattias|bengt|male\b|guy|ryan|thomas|william|christopher|eric|george|daniel|alex\b|fred|david|mark|james|oliver|brian|klaus|sven/i;
+function voiceGender(v){
+  if(FEMALE_NAMES.test(v.name)) return "female";
+  if(MALE_NAMES.test(v.name)) return "male";
+  return "unknown";
+}
 function voiceScore(v){
   // prefer high-quality system voices
   let s=0;
@@ -474,26 +515,30 @@ function voiceScore(v){
   if(/google/i.test(v.name)) s+=3;
   if(/online/i.test(v.name)) s+=1;
   if(v.localService===false) s+=1;
+  if(cfg.voiceGender!=="auto" && voiceGender(v)===cfg.voiceGender) s+=8;
   return s;
 }
 function langVoices(){
   const pre=cfg.lang==="sv"?"sv":"en";
   return voices.filter(v=>v.lang.toLowerCase().startsWith(pre));
 }
-function pickVoice(){
+function pickVoice(force){
   const lv=langVoices().sort((a,b)=>voiceScore(b)-voiceScore(a));
-  if(!cfg.voiceURI || !voices.find(v=>v.voiceURI===cfg.voiceURI)){
+  const cur=voices.find(v=>v.voiceURI===cfg.voiceURI);
+  if(force || !cur || !lv.includes(cur)){
     if(lv.length){ cfg.voiceURI=lv[0].voiceURI; saveCfg(); }
   }
   buildVoiceSel();
 }
 function buildVoiceSel(){
+  // only voices for the app's language - the full system list is overwhelming
   const sel=$("voiceSel"); sel.innerHTML="";
   const lv=langVoices().sort((a,b)=>voiceScore(b)-voiceScore(a));
-  const rest=voices.filter(v=>!lv.includes(v)).sort((a,b)=>a.name.localeCompare(b.name));
-  for(const v of [...lv, ...rest]){
+  for(const v of lv){
     const o=document.createElement("option");
-    o.value=v.voiceURI; o.textContent=v.name+" ("+v.lang+")";
+    const g=voiceGender(v);
+    o.value=v.voiceURI;
+    o.textContent=v.name.replace(/Microsoft |Google /,"")+(g!=="unknown"?(g==="female"?" ♀":" ♂"):"");
     sel.appendChild(o);
   }
   if(cfg.voiceURI) sel.value=cfg.voiceURI;
@@ -552,6 +597,12 @@ function engineFrame(signals, now){
       const yaw=cfg.swapLR ? -signals.yaw : signals.yaw;
       active = g.id==="headRight" ? yaw < -cfg.yawThresh : yaw > cfg.yawThresh;
       if(neutralNeed[g.id]){ if(Math.abs(signals.yaw)<cfg.yawThresh*0.5) neutralNeed[g.id]=false; else active=false; }
+    } else if(g.type==="pitch"){
+      active = g.id==="headUp" ? signals.pitch < -cfg.pitchThresh : signals.pitch > cfg.pitchThresh;
+      if(neutralNeed[g.id]){ if(Math.abs(signals.pitch)<cfg.pitchThresh*0.5) neutralNeed[g.id]=false; else active=false; }
+    } else if(g.type==="mouth"){
+      active = signals.mouth > 0.5;
+      if(neutralNeed[g.id]){ if(signals.mouth<0.2) neutralNeed[g.id]=false; active=false; }
     } else if(g.type==="blink"){
       active = signals.blink;
       holdNeeded = cfg.blinkMs;
@@ -592,6 +643,7 @@ function updateChips(signals, now){
 /* ================= camera + mediapipe loop ================= */
 const video=$("video");
 let lastDetect=0;
+let pitchNeutral=0.52;   // adapts slowly to the person's natural posture
 
 async function initVision(){
   const fileset=await FilesetResolver.forVisionTasks(
@@ -629,7 +681,7 @@ function loop(now){
   if(now-lastDetect < 66) return;   // ~15 fps detection
   lastDetect=now;
 
-  const signals={ yaw:0, blink:false, brow:0, hand:null, handScore:0, face:false };
+  const signals={ yaw:0, pitch:0, blink:false, brow:0, mouth:0, hand:null, handScore:0, face:false };
   try{
     const f=faceLM.detectForVideo(video, now);
     if(f.faceLandmarks && f.faceLandmarks.length){
@@ -639,11 +691,18 @@ function loop(now){
       const dL=Math.hypot(nose.x-lc.x, nose.y-lc.y);
       const dR=Math.hypot(nose.x-rc.x, nose.y-rc.y);
       signals.yaw=(dL-dR)/Math.max(0.001,(dL+dR));
+      // pitch: nose position between the eye line and the chin (0 = at the
+      // eyes, 1 = at the chin) - drifts with real tilt, self-normalised
+      const eyeMidY=(lm[33].y+lm[263].y)/2, chinY=lm[152].y;
+      const rel=(nose.y-eyeMidY)/Math.max(0.001,(chinY-eyeMidY));
+      signals.pitch=rel-pitchNeutral;                 // - = up, + = down
+      if(Math.abs(rel-pitchNeutral)<0.08) pitchNeutral+=(rel-pitchNeutral)*0.03; // slow re-centre
       if(f.faceBlendshapes && f.faceBlendshapes.length){
         const cats=f.faceBlendshapes[0].categories;
         const bl=getBlend(cats,"eyeBlinkLeft"), br=getBlend(cats,"eyeBlinkRight");
         signals.blink=(bl>0.5 && br>0.5);
         signals.brow=getBlend(cats,"browInnerUp");
+        signals.mouth=getBlend(cats,"jawOpen");
       }
     }
     const g=gestureRec.recognizeForVideo(video, now);
@@ -753,7 +812,8 @@ async function buildSettings(){
 
 function bindGlobal(){
   const pairs=[["rateRange","rate",v=>v+"×"],["holdRange","holdMs",v=>v+" ms"],
-    ["yawRange","yawThresh",v=>v],["blinkRange","blinkMs",v=>v+" ms"],["coolRange","coolMs",v=>(v/1000)+" s"]];
+    ["yawRange","yawThresh",v=>v],["pitchRange","pitchThresh",v=>v],
+    ["blinkRange","blinkMs",v=>v+" ms"],["coolRange","coolMs",v=>(v/1000)+" s"]];
   for(const [rid,key,fmt] of pairs){
     const r=$(rid), val=$(rid.replace("Range","Val"));
     r.value=cfg[key]; val.textContent=fmt(cfg[key]);
@@ -762,7 +822,9 @@ function bindGlobal(){
   $("swapLR").checked=cfg.swapLR;
   $("swapLR").onchange=e=>{ cfg.swapLR=e.target.checked; saveCfg(); };
   $("voiceSel").onchange=e=>{ cfg.voiceURI=e.target.value; saveCfg(); };
-  $("langSel").onchange=e=>switchLang(e.target.value);
+  $("genderSel").onchange=e=>{ cfg.voiceGender=e.target.value; saveCfg(); pickVoice(true); };
+  $("flagEn").onclick=()=>switchLang("en");
+  $("flagSv").onclick=()=>switchLang("sv");
   $("exportBtn").onclick=()=>{
     const a=document.createElement("a");
     a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(cfg,null,2));
