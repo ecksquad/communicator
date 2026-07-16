@@ -3,7 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>Communicator</title>
+<title>Communicator — free gesture-to-speech AAC app</title>
+<meta name="description" content="Free communication app for people who cannot speak. The camera recognises head turns, blinks and hand gestures and speaks your phrases aloud — or plays recordings of your own voice. No install, no account, works offline in the browser, 7 languages. All processing stays on your device." />
+<meta property="og:title" content="Communicator — free gesture-to-speech AAC app" />
+<meta property="og:description" content="Turn head movements, blinks and hand gestures into spoken phrases. Free, private, no install — for people who cannot speak or sign." />
+<meta property="og:type" content="website" />
 <style>
   :root{
     --bg:#0b1016; --panel:#141b23; --panel2:#0e151b; --ink:#f2f6f9; --muted:#8b99a6;
@@ -150,6 +154,10 @@
   .app-foot{margin-top:26px;text-align:center;font-size:12.5px;color:#5a6a78;line-height:1.7}
   .app-foot a{display:inline-block;margin-top:6px;color:#8b99a6;text-decoration:none;max-width:52ch}
   .app-foot a:hover{color:var(--accent)}
+  #donateMsg{margin-top:6px;color:#8b99a6;max-width:52ch;margin-left:auto;margin-right:auto}
+  .app-foot a.donate-btn{margin-top:12px;padding:12px 28px;border-radius:999px;background:#ff5e5b;
+    color:#fff;font-size:15px;font-weight:700;text-decoration:none;max-width:none}
+  .app-foot a.donate-btn:hover{background:#ff7a77;color:#fff}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--panel);
     border:1px solid var(--line);padding:12px 20px;border-radius:12px;font-size:15px;font-weight:600;
     opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:92vw;text-align:center}
@@ -204,7 +212,8 @@
       <div id="log"></div>
       <div class="app-foot">
         <div id="deviceNote"></div>
-        <a id="donateLink" class="hidden" href="donate.html" target="_blank" rel="noopener"></a>
+        <div id="donateMsg" class="hidden"></div>
+        <a id="donateBtn" class="donate-btn hidden" href="donate.html" target="_blank" rel="noopener"></a>
       </div>
     </div>
   </div>
@@ -340,7 +349,7 @@ const GESTURES = [
 const STR = {
 en: {
   sub:"MOVEMENT → VOICE", ttsLang:"en-GB",
-  deviceNote:"Works best on a tablet or computer.", donateMsg:"If this app has helped you or someone you love communicate, you can support future development with an optional donation. Thank you ❤️",
+  deviceNote:"Works best on a tablet or computer.", donateMsg:"If this app has helped you or someone you love communicate, you can support future development with an optional donation. Thank you ❤️", donateBtn:"Donate ❤️",
   loading:"Starting the camera and loading recognition …<br><span style='font-size:13px'>(the first time takes a while — the models are downloading)</span>",
   loadFail:pre=>"Could not start: "+pre+"<br><span style='font-size:13px'>Check that the page is allowed to use the camera (padlock in the address bar).</span>",
   waiting:"Waiting for a movement …", seeing:"I can see you ✓", looking:"Looking for a face …",
@@ -406,7 +415,7 @@ en: {
 },
 sv: {
   sub:"RÖRELSER → RÖST", ttsLang:"sv-SE",
-  deviceNote:"Fungerar bäst på surfplatta eller dator.", donateMsg:"Om appen har hjälpt dig eller någon du älskar att kommunicera kan du stödja utvecklingen med en frivillig gåva. Tack ❤️",
+  deviceNote:"Fungerar bäst på surfplatta eller dator.", donateMsg:"Om appen har hjälpt dig eller någon du älskar att kommunicera kan du stödja utvecklingen med en frivillig gåva. Tack ❤️", donateBtn:"Donera ❤️",
   loading:"Startar kameran och laddar igenkänningen …<br><span style='font-size:13px'>(första gången tar det en stund — modellerna laddas ner)</span>",
   loadFail:pre=>"Kunde inte starta: "+pre+"<br><span style='font-size:13px'>Kontrollera att sidan får använda kameran (hänglåset i adressfältet).</span>",
   waiting:"Väntar på rörelse …", seeing:"Ser dig ✓", looking:"Letar efter ansikte …",
@@ -472,7 +481,7 @@ sv: {
 },
 uk: {
   sub:"РУХИ → ГОЛОС", ttsLang:"uk-UA",
-  deviceNote:"Найкраще працює на планшеті або компʼютері.", donateMsg:"Якщо цей застосунок допоміг вам або вашим близьким спілкуватися, ви можете підтримати розробку добровільним внеском. Дякуємо ❤️",
+  deviceNote:"Найкраще працює на планшеті або компʼютері.", donateMsg:"Якщо цей застосунок допоміг вам або вашим близьким спілкуватися, ви можете підтримати розробку добровільним внеском. Дякуємо ❤️", donateBtn:"Підтримати ❤️",
   loading:"Запускаю камеру та розпізнавання …<br><span style='font-size:13px'>(першого разу це триває довше — завантажуються моделі)</span>",
   loadFail:pre=>"Не вдалося запустити: "+pre+"<br><span style='font-size:13px'>Перевірте, що сторінці дозволено використовувати камеру (замочок в адресному рядку).</span>",
   waiting:"Чекаю на рух …", seeing:"Я тебе бачу ✓", looking:"Шукаю обличчя …",
@@ -536,7 +545,7 @@ uk: {
 },
 es: {
   sub:"MOVIMIENTO → VOZ", ttsLang:"es-ES",
-  deviceNote:"Funciona mejor en tableta u ordenador.", donateMsg:"Si esta aplicación te ha ayudado a ti o a un ser querido a comunicarse, puedes apoyar su desarrollo con una donación opcional. Gracias ❤️",
+  deviceNote:"Funciona mejor en tableta u ordenador.", donateMsg:"Si esta aplicación te ha ayudado a ti o a un ser querido a comunicarse, puedes apoyar su desarrollo con una donación opcional. Gracias ❤️", donateBtn:"Donar ❤️",
   loading:"Iniciando la cámara y cargando el reconocimiento …<br><span style='font-size:13px'>(la primera vez tarda un poco — se están descargando los modelos)</span>",
   loadFail:pre=>"No se pudo iniciar: "+pre+"<br><span style='font-size:13px'>Comprueba que la página puede usar la cámara (candado en la barra de direcciones).</span>",
   waiting:"Esperando un movimiento …", seeing:"Te veo ✓", looking:"Buscando una cara …",
@@ -584,7 +593,7 @@ es: {
 },
 de: {
   sub:"BEWEGUNG → STIMME", ttsLang:"de-DE",
-  deviceNote:"Funktioniert am besten auf Tablet oder Computer.", donateMsg:"Wenn diese App dir oder einem geliebten Menschen beim Kommunizieren geholfen hat, kannst du die Entwicklung mit einer freiwilligen Spende unterstützen. Danke ❤️",
+  deviceNote:"Funktioniert am besten auf Tablet oder Computer.", donateMsg:"Wenn diese App dir oder einem geliebten Menschen beim Kommunizieren geholfen hat, kannst du die Entwicklung mit einer freiwilligen Spende unterstützen. Danke ❤️", donateBtn:"Spenden ❤️",
   loading:"Kamera wird gestartet und Erkennung geladen …<br><span style='font-size:13px'>(beim ersten Mal dauert es etwas — die Modelle werden heruntergeladen)</span>",
   loadFail:pre=>"Konnte nicht starten: "+pre+"<br><span style='font-size:13px'>Prüfe, ob die Seite die Kamera verwenden darf (Schloss in der Adressleiste).</span>",
   waiting:"Warte auf eine Bewegung …", seeing:"Ich sehe dich ✓", looking:"Suche ein Gesicht …",
@@ -632,7 +641,7 @@ de: {
 },
 fr: {
   sub:"MOUVEMENT → VOIX", ttsLang:"fr-FR",
-  deviceNote:"Fonctionne mieux sur tablette ou ordinateur.", donateMsg:"Si cette application vous a aidé, vous ou un proche, à communiquer, vous pouvez soutenir son développement par un don facultatif. Merci ❤️",
+  deviceNote:"Fonctionne mieux sur tablette ou ordinateur.", donateMsg:"Si cette application vous a aidé, vous ou un proche, à communiquer, vous pouvez soutenir son développement par un don facultatif. Merci ❤️", donateBtn:"Faire un don ❤️",
   loading:"Démarrage de la caméra et chargement de la reconnaissance …<br><span style='font-size:13px'>(la première fois prend un moment — les modèles se téléchargent)</span>",
   loadFail:pre=>"Impossible de démarrer : "+pre+"<br><span style='font-size:13px'>Vérifie que la page peut utiliser la caméra (cadenas dans la barre d'adresse).</span>",
   waiting:"En attente d'un mouvement …", seeing:"Je te vois ✓", looking:"Recherche d'un visage …",
@@ -680,7 +689,7 @@ fr: {
 },
 pl: {
   sub:"RUCH → GŁOS", ttsLang:"pl-PL",
-  deviceNote:"Działa najlepiej na tablecie lub komputerze.", donateMsg:"Jeśli ta aplikacja pomogła tobie lub komuś bliskiemu się porozumiewać, możesz wesprzeć jej rozwój dobrowolną darowizną. Dziękujemy ❤️",
+  deviceNote:"Działa najlepiej na tablecie lub komputerze.", donateMsg:"Jeśli ta aplikacja pomogła tobie lub komuś bliskiemu się porozumiewać, możesz wesprzeć jej rozwój dobrowolną darowizną. Dziękujemy ❤️", donateBtn:"Wesprzyj ❤️",
   loading:"Uruchamianie kamery i ładowanie rozpoznawania …<br><span style='font-size:13px'>(za pierwszym razem trwa to dłużej — pobierane są modele)</span>",
   loadFail:pre=>"Nie udało się uruchomić: "+pre+"<br><span style='font-size:13px'>Sprawdź, czy strona może używać kamery (kłódka w pasku adresu).</span>",
   waiting:"Czekam na ruch …", seeing:"Widzę cię ✓", looking:"Szukam twarzy …",
@@ -856,8 +865,10 @@ function applyLang(){
   if($("loading") && !$("loading").classList.contains("hidden") && !$("loading").dataset.failed)
     $("loading").innerHTML=t.loading;
   $("deviceNote").textContent=t.deviceNote;
-  $("donateLink").textContent=t.donateMsg;
-  $("donateLink").classList.toggle("hidden", !SHOW_DONATE);
+  $("donateMsg").textContent=t.donateMsg;
+  $("donateMsg").classList.toggle("hidden", !SHOW_DONATE);
+  $("donateBtn").textContent=t.donateBtn;
+  $("donateBtn").classList.toggle("hidden", !SHOW_DONATE);
 }
 
 /* ================= recordings (IndexedDB) ================= */
