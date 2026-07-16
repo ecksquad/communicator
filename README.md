@@ -50,5 +50,10 @@ GestureRecognizer), Web Speech API for TTS, MediaRecorder + IndexedDB for
 own-voice recordings, localStorage for configuration. MIT licensed — use it,
 translate it, build on it.
 
+## Contact
+
+Questions, feedback, feature requests or success stories: **ecksquad@gmail.com**
+(or open an issue here). Hearing what works and what doesn't is what improves the app.
+
 If this app helped someone you love communicate, you can support future
 development at the [donation page](https://ecksquad.github.io/communicator2/donate.html) ❤️
