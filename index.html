@@ -8,6 +8,14 @@
 <meta property="og:title" content="Communicator — free gesture-to-speech AAC app" />
 <meta property="og:description" content="Turn head movements, blinks and hand gestures into spoken phrases. Free, private, no install — for people who cannot speak or sign." />
 <meta property="og:type" content="website" />
+<meta name="theme-color" content="#0b1016">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Communicator">
 <style>
   :root{
     --bg:#0b1016; --panel:#141b23; --panel2:#0e151b; --ink:#f2f6f9; --muted:#8b99a6;
@@ -165,6 +173,13 @@
   .hidden{display:none !important}
   #loading{padding:40px 10px;text-align:center;color:var(--muted);font-size:17px;line-height:1.7}
 
+  .chip-btn{height:38px;border-radius:999px;border:1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    background:color-mix(in srgb, var(--accent) 14%, transparent);color:var(--accent);padding:0 14px;
+    font:inherit;font-size:13px;font-weight:650;cursor:pointer;white-space:nowrap}
+  .chip-btn:active{transform:scale(.95)}
+  .install-steps{margin:0 0 16px;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:14.5px;line-height:1.5;color:#b9c4cf}
+  .install-steps b{color:var(--accent)}
+
   /* instructions overlay */
   .modal-veil{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:40;display:none;overflow-y:auto;padding:20px 14px 40px}
   .modal-veil.show{display:block}
@@ -184,6 +199,7 @@
 <header>
   <div class="h-title" id="hTitle">COMMUNICATOR<small id="hSub">MOVEMENT → VOICE</small></div>
   <div class="h-btns">
+    <button class="chip-btn" id="installBtn" hidden>&#128241; Spara</button>
     <button class="icon-btn lang-chip" id="langBtn" title="Language / voice"></button>
     <button class="icon-btn" id="helpBtn" title="Instructions">?</button>
     <button class="icon-btn" id="fsBtn" title="Fullscreen">⛶</button>
@@ -309,6 +325,16 @@
       <div id="instrList"></div>
       <div class="tips" id="tipsBox"></div>
       <button class="bigbtn" id="helpClose"></button>
+    </div>
+  </div>
+
+  <!-- ================= SPARA PÅ HEMSKÄRMEN ================= -->
+  <div class="modal-veil" id="installVeil">
+    <div class="modal">
+      <h3>Spara på hemskärmen</h3>
+      <p class="sub2">Appen får en egen ikon och öppnas i helskärm – som en vanlig app, utan adressfält.</p>
+      <ol class="install-steps" id="installSteps"></ol>
+      <button class="bigbtn" id="installClose">Stäng</button>
     </div>
   </div>
 </main>
@@ -1322,6 +1348,49 @@ function toast(msg){
   }catch(e){
     $("loading").dataset.failed="1";
     $("loading").innerHTML=T().loadFail(e.message);
+  }
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  // ---- spara pa hemskarmen (PWA install) ----
+  var installBtn = document.getElementById("installBtn");
+  var deferredInstall = null;
+  var isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  if(!isStandalone) installBtn.hidden = false;
+
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferredInstall = e;
+    if(!isStandalone) installBtn.hidden = false;
+  });
+  window.addEventListener("appinstalled", function(){ installBtn.hidden = true; });
+
+  installBtn.addEventListener("click", function(){
+    if(deferredInstall){
+      deferredInstall.prompt();
+      deferredInstall.userChoice.then(function(r){
+        if(r.outcome === "accepted") installBtn.hidden = true;
+        deferredInstall = null;
+      });
+    }else{
+      var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      document.getElementById("installSteps").innerHTML = isIOS
+        ? '<li>Öppna sidan i <b>Safari</b> (om du inte redan gjort det)</li>' +
+          '<li>Tryck på <b>dela-ikonen</b> <span style="font-size:16px">&#x2B06;&#xFE0E;</span> i verktygsfältet</li>' +
+          '<li>Välj <b>”Lägg till på hemskärmen”</b> och tryck <b>Lägg till</b></li>'
+        : '<li>Öppna webbläsarens meny <b>&#8942;</b></li>' +
+          '<li>Välj <b>”Lägg till på startskärmen”</b> eller <b>”Installera app”</b></li>';
+      document.getElementById("installVeil").classList.add("show");
+    }
+  });
+  document.getElementById("installClose").addEventListener("click", function(){
+    document.getElementById("installVeil").classList.remove("show");
+  });
+
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
   }
 })();
 </script>
